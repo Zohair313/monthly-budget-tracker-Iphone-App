@@ -161,7 +161,7 @@ async function getExpenses(req, res, next) {
       expenseRows = result.rows;
     }
 
-    const expenses = expenseRows.map(e => ({
+    const expenses = expenseRows.map((e) => ({
       id: e.id,
       name: e.name,
       amount: parseFloat(e.amount),
@@ -211,10 +211,10 @@ async function editExpense(req, res, next) {
     }
 
     // Verify ownership and get existing expense
-    const existing = await db.query(
-      'SELECT * FROM expenses WHERE id = $1 AND user_id = $2',
-      [expenseId, userId]
-    );
+    const existing = await db.query('SELECT * FROM expenses WHERE id = $1 AND user_id = $2', [
+      expenseId,
+      userId
+    ]);
 
     if (existing.rows.length === 0) {
       return res.status(404).json({
@@ -242,10 +242,9 @@ async function editExpense(req, res, next) {
     const updatedExpense = updateResult.rows[0];
 
     // Find the associated income to recalculate balance
-    const incomeResult = await db.query(
-      'SELECT month, year FROM incomes WHERE id = $1',
-      [updatedExpense.income_id]
-    );
+    const incomeResult = await db.query('SELECT month, year FROM incomes WHERE id = $1', [
+      updatedExpense.income_id
+    ]);
 
     let updatedSummary = null;
     if (incomeResult.rows.length > 0) {
@@ -291,10 +290,10 @@ async function deleteExpense(req, res, next) {
     }
 
     // Verify ownership and get income_id
-    const existing = await db.query(
-      'SELECT * FROM expenses WHERE id = $1 AND user_id = $2',
-      [expenseId, userId]
-    );
+    const existing = await db.query('SELECT * FROM expenses WHERE id = $1 AND user_id = $2', [
+      expenseId,
+      userId
+    ]);
 
     if (existing.rows.length === 0) {
       return res.status(404).json({
@@ -306,16 +305,12 @@ async function deleteExpense(req, res, next) {
     const target = existing.rows[0];
 
     // Delete the expense
-    await db.query(
-      'DELETE FROM expenses WHERE id = $1 AND user_id = $2',
-      [expenseId, userId]
-    );
+    await db.query('DELETE FROM expenses WHERE id = $1 AND user_id = $2', [expenseId, userId]);
 
     // Dynamic balance is automatically updated because it computes income - SUM(expenses)!
-    const incomeResult = await db.query(
-      'SELECT month, year FROM incomes WHERE id = $1',
-      [target.income_id]
-    );
+    const incomeResult = await db.query('SELECT month, year FROM incomes WHERE id = $1', [
+      target.income_id
+    ]);
 
     let updatedSummary = null;
     if (incomeResult.rows.length > 0) {

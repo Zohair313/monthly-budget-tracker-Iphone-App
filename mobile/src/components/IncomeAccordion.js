@@ -14,15 +14,25 @@ import {
 import Ionicons from './Icon';
 import { useBudget } from '../context/BudgetContext';
 import { useAuth } from '../context/AuthContext';
-import { palette, getClayCard, getClayInput, getClayPill } from '../theme/colors';
+import { palette, getClayCard, getClayInput } from '../theme/colors';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
 ];
 
 const formatCurrency = (amount) => {
@@ -34,9 +44,7 @@ export default function IncomeAccordion({ isExpanded, onToggle }) {
   const { summary, incomeData, updateIncome, selectedMonth, selectedYear } = useBudget();
   const { themeMode } = useAuth();
   const colors = palette[themeMode] || palette.light;
-  const isDark = themeMode === 'dark';
   const clayCard = getClayCard(themeMode);
-  const clayPill = getClayPill(themeMode);
   const clayInput = getClayInput(themeMode);
 
   const [inputAmount, setInputAmount] = useState('');
@@ -51,7 +59,7 @@ export default function IncomeAccordion({ isExpanded, onToggle }) {
       duration: 250,
       useNativeDriver: Platform.OS !== 'web'
     }).start();
-  }, [isExpanded]);
+  }, [isExpanded, rotateAnim]);
 
   useEffect(() => {
     if (incomeData?.amount) {
@@ -98,16 +106,9 @@ export default function IncomeAccordion({ isExpanded, onToggle }) {
   };
 
   const totalIncome = summary.total_income || 0;
-  const isIncomeSet = totalIncome > 0;
 
   return (
-    <View
-      style={[
-        styles.container,
-        clayCard,
-        isExpanded && { borderBottomColor: colors.income }
-      ]}
-    >
+    <View style={[styles.container, clayCard, isExpanded && { borderBottomColor: colors.income }]}>
       {/* Accordion Header (Clickable) - Standard 78px Puffy Clay Height */}
       <TouchableOpacity
         style={styles.headerTouch}
@@ -134,7 +135,10 @@ export default function IncomeAccordion({ isExpanded, onToggle }) {
 
           <View style={styles.headerTextGroup}>
             <Text style={[styles.accordionTitle, { color: colors.text }]}>Monthly Income</Text>
-            <Text style={[styles.accordionSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+            <Text
+              style={[styles.accordionSubtitle, { color: colors.textSecondary }]}
+              numberOfLines={1}
+            >
               {MONTH_NAMES[selectedMonth - 1]} {selectedYear}
             </Text>
           </View>
@@ -156,10 +160,16 @@ export default function IncomeAccordion({ isExpanded, onToggle }) {
       {isExpanded && (
         <View style={[styles.expandedContent, { borderTopColor: colors.borderSubtle }]}>
           {/* Explanatory Policy Banner */}
-          <View style={[styles.policyNotice, { backgroundColor: colors.incomeLight, borderColor: colors.incomeBorder }]}>
+          <View
+            style={[
+              styles.policyNotice,
+              { backgroundColor: colors.incomeLight, borderColor: colors.incomeBorder }
+            ]}
+          >
             <Ionicons name="information-circle" size={16} color={colors.income} />
             <Text style={[styles.policyNoticeText, { color: colors.incomeDark }]}>
-              Income is dynamic. Changing your income automatically recalculates your remaining balance for {MONTH_NAMES[selectedMonth - 1]}.
+              Income is dynamic. Changing your income automatically recalculates your remaining
+              balance for {MONTH_NAMES[selectedMonth - 1]}.
             </Text>
           </View>
 
@@ -167,12 +177,16 @@ export default function IncomeAccordion({ isExpanded, onToggle }) {
           <View style={[styles.metricsBar, { backgroundColor: colors.surfaceSubtle }]}>
             <View style={styles.metricItem}>
               <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>BASE INCOME</Text>
-              <Text style={[styles.metricVal, { color: colors.income }]}>{formatCurrency(totalIncome)}</Text>
+              <Text style={[styles.metricVal, { color: colors.income }]}>
+                {formatCurrency(totalIncome)}
+              </Text>
             </View>
             <View style={styles.metricDivider} />
             <View style={styles.metricItem}>
               <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>TOTAL SPENT</Text>
-              <Text style={[styles.metricVal, { color: colors.expense }]}>{formatCurrency(summary.total_expense || 0)}</Text>
+              <Text style={[styles.metricVal, { color: colors.expense }]}>
+                {formatCurrency(summary.total_expense || 0)}
+              </Text>
             </View>
           </View>
 
@@ -202,7 +216,8 @@ export default function IncomeAccordion({ isExpanded, onToggle }) {
                   style={[
                     styles.presetChip,
                     {
-                      backgroundColor: inputAmount === String(preset) ? colors.income : colors.surfaceSubtle,
+                      backgroundColor:
+                        inputAmount === String(preset) ? colors.income : colors.surfaceSubtle,
                       borderColor: inputAmount === String(preset) ? colors.income : colors.border
                     }
                   ]}
@@ -218,7 +233,7 @@ export default function IncomeAccordion({ isExpanded, onToggle }) {
                       }
                     ]}
                   >
-                    Rs. {(preset / 1000)}k
+                    Rs. {preset / 1000}k
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -230,8 +245,12 @@ export default function IncomeAccordion({ isExpanded, onToggle }) {
                 style={[
                   styles.feedbackBox,
                   {
-                    backgroundColor: feedbackMsg.includes('✓') ? colors.incomeLight : colors.expenseLight,
-                    borderColor: feedbackMsg.includes('✓') ? colors.incomeBorder : colors.expenseBorder
+                    backgroundColor: feedbackMsg.includes('✓')
+                      ? colors.incomeLight
+                      : colors.expenseLight,
+                    borderColor: feedbackMsg.includes('✓')
+                      ? colors.incomeBorder
+                      : colors.expenseBorder
                   }
                 ]}
               >
@@ -248,10 +267,7 @@ export default function IncomeAccordion({ isExpanded, onToggle }) {
 
             {/* Full Width Submit Button */}
             <TouchableOpacity
-              style={[
-                styles.saveButton,
-                { backgroundColor: colors.income }
-              ]}
+              style={[styles.saveButton, { backgroundColor: colors.income }]}
               onPress={handleSaveIncome}
               disabled={isSaving}
               activeOpacity={0.85}

@@ -55,7 +55,9 @@ export default function CategoryBreakdown({ onSelectCategory, activeCategory }) 
         <View style={[styles.chartWell, { backgroundColor: colors.chartWell }]}>
           <Text style={styles.wellTitle}>Outcome Transactions</Text>
           <Text style={styles.wellSubtitle}>
-            {hasRealData ? 'Tap any bar to filter category' : 'Preview • Add expenses to see live bars'}
+            {hasRealData
+              ? 'Tap any bar to filter category'
+              : 'Preview • Add expenses to see live bars'}
           </Text>
 
           {/* 3D Puffy Pink Vertical Pill Bars */}
@@ -123,10 +125,7 @@ export default function CategoryBreakdown({ onSelectCategory, activeCategory }) 
           >
             <TouchableOpacity
               onPress={() => onSelectCategory(null)}
-              style={[
-                styles.filterChip,
-                activeCategory === null && styles.filterChipActive
-              ]}
+              style={[styles.filterChip, activeCategory === null && styles.filterChipActive]}
             >
               <Text style={styles.filterChipText}>All</Text>
             </TouchableOpacity>
@@ -138,10 +137,7 @@ export default function CategoryBreakdown({ onSelectCategory, activeCategory }) 
                 <TouchableOpacity
                   key={cat}
                   onPress={() => onSelectCategory(isSelected ? null : cat)}
-                  style={[
-                    styles.filterChip,
-                    isSelected && styles.filterChipActive
-                  ]}
+                  style={[styles.filterChip, isSelected && styles.filterChipActive]}
                 >
                   <Ionicons name={catInfo.icon} size={12} color="#FFFFFF" />
                   <Text style={styles.filterChipText}>{cat}</Text>

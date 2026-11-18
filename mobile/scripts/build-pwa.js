@@ -61,13 +61,13 @@ for (const ttfPath of ttfFiles) {
   const relNewNoSlash = `fonts/${fileName}`;
 
   fs.copyFileSync(ttfPath, path.join(fontsDir, fileName));
-  preloadLinks.push(`<link rel="preload" href="${relNew}" as="font" type="font/ttf" crossorigin="anonymous" />`);
+  preloadLinks.push(
+    `<link rel="preload" href="${relNew}" as="font" type="font/ttf" crossorigin="anonymous" />`
+  );
 
   for (const jsPath of jsBundles) {
-    let js = fs.readFileSync(jsPath, 'utf8');
-    const updated = js
-      .split(relOld).join(relNew)
-      .split(relOldNoSlash).join(relNewNoSlash);
+    const js = fs.readFileSync(jsPath, 'utf8');
+    const updated = js.split(relOld).join(relNew).split(relOldNoSlash).join(relNewNoSlash);
     if (updated !== js) {
       fs.writeFileSync(jsPath, updated, 'utf8');
       console.log(`✓ Rewrote font path in ${path.basename(jsPath)} -> ${relNew}`);
@@ -222,4 +222,6 @@ const swScript = `
 html = html.replace('</body>', `${swScript}\n</body>`);
 
 fs.writeFileSync(indexPath, html, 'utf8');
-console.log('✓ Standalone iPhone PWA built successfully into backend/public with relocated /fonts/!');
+console.log(
+  '✓ Standalone iPhone PWA built successfully into backend/public with relocated /fonts/!'
+);

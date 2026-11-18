@@ -17,8 +17,18 @@ import { useAuth } from '../context/AuthContext';
 import { palette, getClayCard, getClayButton, getClayPill } from '../theme/colors';
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
 ];
 
 const formatRs = (val) => `Rs. ${(Number(val) || 0).toLocaleString('en-US')}`;
@@ -39,7 +49,9 @@ export default function ExportModal({ visible, onClose }) {
   const totalIncome = summary.total_income || 0;
   const totalExpense = summary.total_expense || 0;
   const remainingBalance =
-    summary.remaining_balance !== undefined ? summary.remaining_balance : totalIncome - totalExpense;
+    summary.remaining_balance !== undefined
+      ? summary.remaining_balance
+      : totalIncome - totalExpense;
   const burnRate = summary.burn_rate_percent || 0;
 
   // Generate Real Styled PDF Statement (jsPDF)
@@ -83,8 +95,18 @@ export default function ExportModal({ visible, onClose }) {
       const cardH = 24;
 
       const summaryCards = [
-        { label: 'MONTHLY INCOME', value: formatRs(totalIncome), bg: [232, 250, 240], accent: [32, 158, 92] },
-        { label: 'TOTAL EXPENSES', value: formatRs(totalExpense), bg: [255, 240, 240], accent: [204, 67, 67] },
+        {
+          label: 'MONTHLY INCOME',
+          value: formatRs(totalIncome),
+          bg: [232, 250, 240],
+          accent: [32, 158, 92]
+        },
+        {
+          label: 'TOTAL EXPENSES',
+          value: formatRs(totalExpense),
+          bg: [255, 240, 240],
+          accent: [204, 67, 67]
+        },
         {
           label: 'REMAINING BALANCE',
           value: formatRs(remainingBalance),
@@ -124,7 +146,9 @@ export default function ExportModal({ visible, onClose }) {
             ? 'Caution (80%+ Spent)'
             : 'Healthy Budget';
       doc.text(`Budget Consumed: ${burnRate}%   |   Status: ${statusText}`, margin + 4, y + 7);
-      doc.text(`Total Transactions: ${expenses.length}`, pageW - margin - 4, y + 7, { align: 'right' });
+      doc.text(`Total Transactions: ${expenses.length}`, pageW - margin - 4, y + 7, {
+        align: 'right'
+      });
 
       y += 18;
 
@@ -254,11 +278,7 @@ export default function ExportModal({ visible, onClose }) {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
         doc.setTextColor(150, 158, 180);
-        doc.text(
-          'Monthly Budget Tracker  •  Secured by Neon PostgreSQL',
-          margin,
-          pageH - 10
-        );
+        doc.text('Monthly Budget Tracker  •  Secured by Neon PostgreSQL', margin, pageH - 10);
         doc.text(`Page ${i} of ${totalPages}`, pageW - margin, pageH - 10, { align: 'right' });
       }
 
@@ -373,20 +393,31 @@ export default function ExportModal({ visible, onClose }) {
           <View style={[styles.metricsBox, clayPill, { backgroundColor: colors.surfaceSubtle }]}>
             <View style={styles.metricItem}>
               <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>INCOME</Text>
-              <Text style={[styles.metricVal, { color: colors.income }]}>{formatRs(totalIncome)}</Text>
+              <Text style={[styles.metricVal, { color: colors.income }]}>
+                {formatRs(totalIncome)}
+              </Text>
             </View>
             <View style={styles.metricItem}>
               <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>EXPENSE</Text>
-              <Text style={[styles.metricVal, { color: colors.expense }]}>{formatRs(totalExpense)}</Text>
+              <Text style={[styles.metricVal, { color: colors.expense }]}>
+                {formatRs(totalExpense)}
+              </Text>
             </View>
             <View style={styles.metricItem}>
               <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>BALANCE</Text>
-              <Text style={[styles.metricVal, { color: colors.primary }]}>{formatRs(remainingBalance)}</Text>
+              <Text style={[styles.metricVal, { color: colors.primary }]}>
+                {formatRs(remainingBalance)}
+              </Text>
             </View>
           </View>
 
           {/* Statement Summary Info */}
-          <ScrollView style={[styles.previewBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+          <ScrollView
+            style={[
+              styles.previewBox,
+              { backgroundColor: colors.background, borderColor: colors.border }
+            ]}
+          >
             <Text style={[styles.previewHeading, { color: colors.text }]}>
               Included in Your PDF Statement:
             </Text>
@@ -409,7 +440,9 @@ export default function ExportModal({ visible, onClose }) {
               style={[
                 styles.statusPill,
                 {
-                  backgroundColor: statusMsg.includes('✓') ? colors.incomeLight : colors.expenseLight
+                  backgroundColor: statusMsg.includes('✓')
+                    ? colors.incomeLight
+                    : colors.expenseLight
                 }
               ]}
             >

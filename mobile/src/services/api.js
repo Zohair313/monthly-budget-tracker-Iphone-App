@@ -131,9 +131,14 @@ class ApiService {
       return data;
     } catch (error) {
       if (error.name === 'AbortError') {
-        throw new Error('Connection timed out. Please verify your backend server is running and accessible.');
+        throw new Error(
+          'Connection timed out. Please verify your backend server is running and accessible.'
+        );
       }
-      if (error.message.includes('Network request failed') || error.message.includes('Failed to fetch')) {
+      if (
+        error.message.includes('Network request failed') ||
+        error.message.includes('Failed to fetch')
+      ) {
         const msg = `Unable to reach backend at ${this.baseUrl}. If testing on an iPhone, use your computer's local IP address (e.g. http://192.168.1.x:5000) or switch to Demo Mode.`;
         const err = new Error(msg);
         err.isNetworkError = true;
@@ -151,11 +156,36 @@ class ApiService {
     let demoData = await AsyncStorage.getItem('@demo_db_store');
     if (!demoData) {
       demoData = {
-        incomes: [{ id: 1, month: new Date().getMonth() + 1, year: new Date().getFullYear(), amount: 100000 }],
+        incomes: [
+          {
+            id: 1,
+            month: new Date().getMonth() + 1,
+            year: new Date().getFullYear(),
+            amount: 100000
+          }
+        ],
         expenses: [
-          { id: 1, name: 'Electricity Bill', amount: 8000, category: 'Bills', date: new Date().toISOString().split('T')[0] },
-          { id: 2, name: 'Monthly Groceries', amount: 15000, category: 'Food', date: new Date().toISOString().split('T')[0] },
-          { id: 3, name: 'Car Fuel', amount: 7000, category: 'Travel', date: new Date().toISOString().split('T')[0] }
+          {
+            id: 1,
+            name: 'Electricity Bill',
+            amount: 8000,
+            category: 'Bills',
+            date: new Date().toISOString().split('T')[0]
+          },
+          {
+            id: 2,
+            name: 'Monthly Groceries',
+            amount: 15000,
+            category: 'Food',
+            date: new Date().toISOString().split('T')[0]
+          },
+          {
+            id: 3,
+            name: 'Car Fuel',
+            amount: 7000,
+            category: 'Travel',
+            date: new Date().toISOString().split('T')[0]
+          }
         ],
         nextExpenseId: 4
       };
@@ -171,7 +201,11 @@ class ApiService {
       return {
         success: true,
         token: 'demo-jwt-token-active',
-        user: { id: 'demo-user-id', name: body.name || 'Demo Trainee', email: body.email || 'demo@budget.com' }
+        user: {
+          id: 'demo-user-id',
+          name: body.name || 'Demo Trainee',
+          email: body.email || 'demo@budget.com'
+        }
       };
     }
 
@@ -180,7 +214,7 @@ class ApiService {
       const month = parseInt(urlParams.get('month') || currentMonth, 10);
       const year = parseInt(urlParams.get('year') || currentYear, 10);
 
-      const inc = demoData.incomes.find(i => i.month === month && i.year === year);
+      const inc = demoData.incomes.find((i) => i.month === month && i.year === year);
       const totalIncome = inc ? inc.amount : 0;
       const totalExpense = demoData.expenses.reduce((s, e) => s + Number(e.amount), 0);
       const remainingBalance = totalIncome - totalExpense;
@@ -213,7 +247,7 @@ class ApiService {
 
     if (path.startsWith('/api/income') && method === 'POST') {
       const { month, year, amount } = body;
-      let inc = demoData.incomes.find(i => i.month === month && i.year === year);
+      const inc = demoData.incomes.find((i) => i.month === month && i.year === year);
       if (inc) {
         inc.amount = Number(amount);
       } else {
@@ -234,8 +268,8 @@ class ApiService {
             total_expense: totalExpense,
             remaining_balance: Number(amount) - totalExpense,
             burn_rate_percent: Math.round((totalExpense / Number(amount)) * 1000) / 10,
-            is_budget_alert: (totalExpense / Number(amount)) >= 0.8,
-            is_over_budget: (Number(amount) - totalExpense) < 0
+            is_budget_alert: totalExpense / Number(amount) >= 0.8,
+            is_over_budget: Number(amount) - totalExpense < 0
           }
         }
       };
@@ -244,7 +278,7 @@ class ApiService {
     if (path.startsWith('/api/expenses') && method === 'GET') {
       const categoryBreakdown = {};
       let total = 0;
-      demoData.expenses.forEach(e => {
+      demoData.expenses.forEach((e) => {
         total += Number(e.amount);
         categoryBreakdown[e.category] = (categoryBreakdown[e.category] || 0) + Number(e.amount);
       });
@@ -269,13 +303,15 @@ class ApiService {
       demoData.expenses.unshift(newExp);
       await AsyncStorage.setItem('@demo_db_store', JSON.stringify(demoData));
 
-      const inc = demoData.incomes.find(i => i.month === (body.month || currentMonth) && i.year === (body.year || currentYear));
+      const inc = demoData.incomes.find(
+        (i) => i.month === (body.month || currentMonth) && i.year === (body.year || currentYear)
+      );
       const totalIncome = inc ? inc.amount : 0;
       const totalExpense = demoData.expenses.reduce((s, e) => s + Number(e.amount), 0);
       const remainingBalance = totalIncome - totalExpense;
 
       let warning = null;
-      if (Number(body.amount) > (remainingBalance + Number(body.amount))) {
+      if (Number(body.amount) > remainingBalance + Number(body.amount)) {
         warning = {
           exceeded: true,
           message: `Expense exceeds remaining balance. Trainee policy: Allowed with warning.`
@@ -291,8 +327,9 @@ class ApiService {
           total_income: totalIncome,
           total_expense: totalExpense,
           remaining_balance: remainingBalance,
-          burn_rate_percent: totalIncome > 0 ? Math.round((totalExpense / totalIncome) * 1000) / 10 : 100,
-          is_budget_alert: totalIncome > 0 ? (totalExpense / totalIncome) >= 0.8 : true,
+          burn_rate_percent:
+            totalIncome > 0 ? Math.round((totalExpense / totalIncome) * 1000) / 10 : 100,
+          is_budget_alert: totalIncome > 0 ? totalExpense / totalIncome >= 0.8 : true,
           is_over_budget: remainingBalance < 0
         }
       };
@@ -300,17 +337,25 @@ class ApiService {
 
     if (path.match(/\/api\/expenses\/\d+/) && method === 'PUT') {
       const id = parseInt(path.split('/').pop(), 10);
-      const idx = demoData.expenses.findIndex(e => e.id === id);
+      const idx = demoData.expenses.findIndex((e) => e.id === id);
       if (idx !== -1) {
-        demoData.expenses[idx] = { ...demoData.expenses[idx], ...body, amount: Number(body.amount || demoData.expenses[idx].amount) };
+        demoData.expenses[idx] = {
+          ...demoData.expenses[idx],
+          ...body,
+          amount: Number(body.amount || demoData.expenses[idx].amount)
+        };
         await AsyncStorage.setItem('@demo_db_store', JSON.stringify(demoData));
       }
-      return { success: true, message: 'Expense updated successfully', expense: demoData.expenses[idx] };
+      return {
+        success: true,
+        message: 'Expense updated successfully',
+        expense: demoData.expenses[idx]
+      };
     }
 
     if (path.match(/\/api\/expenses\/\d+/) && method === 'DELETE') {
       const id = parseInt(path.split('/').pop(), 10);
-      demoData.expenses = demoData.expenses.filter(e => e.id !== id);
+      demoData.expenses = demoData.expenses.filter((e) => e.id !== id);
       await AsyncStorage.setItem('@demo_db_store', JSON.stringify(demoData));
       return { success: true, message: 'Expense deleted successfully' };
     }

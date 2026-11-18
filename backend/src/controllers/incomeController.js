@@ -30,7 +30,8 @@ async function calculateMonthFinancials(userId, month, year) {
   const remainingBalance = totalIncome - totalExpense;
 
   // 4. Calculate burn rate & alert indicators
-  const burnRate = totalIncome > 0 ? (totalExpense / totalIncome) * 100 : (totalExpense > 0 ? 100 : 0);
+  const burnRate =
+    totalIncome > 0 ? (totalExpense / totalIncome) * 100 : totalExpense > 0 ? 100 : 0;
   const isBudgetAlert = burnRate >= 80;
   const isOverBudget = remainingBalance < 0;
 
@@ -53,18 +54,19 @@ async function calculateMonthFinancials(userId, month, year) {
     prevTotalExpense = parseFloat(prevExpenseSumResult.rows[0].total_expense) || 0;
   }
 
-  const expenseChangeVsPrev = prevTotalExpense > 0 
-    ? ((totalExpense - prevTotalExpense) / prevTotalExpense) * 100 
-    : 0;
+  const expenseChangeVsPrev =
+    prevTotalExpense > 0 ? ((totalExpense - prevTotalExpense) / prevTotalExpense) * 100 : 0;
 
   return {
-    income: incomeRow ? {
-      id: incomeRow.id,
-      month: incomeRow.month,
-      year: incomeRow.year,
-      amount: totalIncome,
-      createdAt: incomeRow.created_at
-    } : null,
+    income: incomeRow
+      ? {
+          id: incomeRow.id,
+          month: incomeRow.month,
+          year: incomeRow.year,
+          amount: totalIncome,
+          createdAt: incomeRow.created_at
+        }
+      : null,
     summary: {
       month: Number(month),
       year: Number(year),
@@ -103,8 +105,7 @@ async function setOrUpdateIncome(req, res, next) {
       RETURNING *;
     `;
 
-    const result = await db.query(upsertQuery, [userId, month, year, amount]);
-    const updatedIncome = result.rows[0];
+    await db.query(upsertQuery, [userId, month, year, amount]);
 
     // Compute updated balance on the fly
     const financials = await calculateMonthFinancials(userId, month, year);

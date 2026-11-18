@@ -16,7 +16,16 @@ import { useSecurity } from '../context/SecurityContext';
 import { palette, getClayCard, getClayButton, getClayInput, getClayPill } from '../theme/colors';
 
 export default function ServerConfigModal({ visible, onClose }) {
-  const { user, isAuthenticated, logout, apiUrl, updateApiUrl, demoMode, toggleDemoMode, themeMode } = useAuth();
+  const {
+    user,
+    isAuthenticated,
+    logout,
+    apiUrl,
+    updateApiUrl,
+    demoMode,
+    toggleDemoMode,
+    themeMode
+  } = useAuth();
   const {
     hasPin,
     biometricEnabled,
@@ -164,7 +173,9 @@ export default function ServerConfigModal({ visible, onClose }) {
                 <Text style={[styles.sectionLabel, { color: colors.primary }]}>
                   SIGNED-IN ACCOUNT
                 </Text>
-                <View style={[styles.accountCard, clayPill, { backgroundColor: colors.surfaceSubtle }]}>
+                <View
+                  style={[styles.accountCard, clayPill, { backgroundColor: colors.surfaceSubtle }]}
+                >
                   <View style={styles.accountRow}>
                     <View style={[styles.accountAvatar, { backgroundColor: colors.primary }]}>
                       <Text style={styles.accountAvatarText}>
@@ -175,7 +186,10 @@ export default function ServerConfigModal({ visible, onClose }) {
                       <Text style={[styles.settingTitle, { color: colors.text }]} numberOfLines={1}>
                         {user.name || 'Account Holder'}
                       </Text>
-                      <Text style={[styles.settingDesc, { color: colors.textSecondary }]} numberOfLines={1}>
+                      <Text
+                        style={[styles.settingDesc, { color: colors.textSecondary }]}
+                        numberOfLines={1}
+                      >
                         {user.email}
                       </Text>
                     </View>
@@ -183,7 +197,10 @@ export default function ServerConfigModal({ visible, onClose }) {
 
                   <TouchableOpacity
                     onPress={handleSwitchAccount}
-                    style={[styles.logoutBtn, { backgroundColor: colors.expenseLight, borderColor: colors.expense }]}
+                    style={[
+                      styles.logoutBtn,
+                      { backgroundColor: colors.expenseLight, borderColor: colors.expense }
+                    ]}
                     activeOpacity={0.82}
                   >
                     <Ionicons name="log-out-outline" size={16} color={colors.expense} />
@@ -202,7 +219,9 @@ export default function ServerConfigModal({ visible, onClose }) {
                   SECURITY & APP LOCK
                 </Text>
 
-                <View style={[styles.securityCard, clayPill, { backgroundColor: colors.surfaceSubtle }]}>
+                <View
+                  style={[styles.securityCard, clayPill, { backgroundColor: colors.surfaceSubtle }]}
+                >
                   {/* 4-Digit PIN Lock Row */}
                   <View style={styles.settingRow}>
                     <View style={styles.settingInfo}>
@@ -259,16 +278,24 @@ export default function ServerConfigModal({ visible, onClose }) {
                     <View style={styles.pinActionsRow}>
                       <TouchableOpacity
                         onPress={handleChangePin}
-                        style={[styles.pinMiniBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                        style={[
+                          styles.pinMiniBtn,
+                          { backgroundColor: colors.surface, borderColor: colors.border }
+                        ]}
                         activeOpacity={0.8}
                       >
                         <Ionicons name="key-outline" size={14} color={colors.primary} />
-                        <Text style={[styles.pinMiniText, { color: colors.primary }]}>Change PIN</Text>
+                        <Text style={[styles.pinMiniText, { color: colors.primary }]}>
+                          Change PIN
+                        </Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity
                         onPress={handleLockNow}
-                        style={[styles.pinMiniBtn, { backgroundColor: colors.primary, borderColor: colors.primary }]}
+                        style={[
+                          styles.pinMiniBtn,
+                          { backgroundColor: colors.primary, borderColor: colors.primary }
+                        ]}
                         activeOpacity={0.85}
                       >
                         <Ionicons name="lock-closed" size={14} color="#FFFFFF" />
@@ -285,7 +312,9 @@ export default function ServerConfigModal({ visible, onClose }) {
                 style={[
                   styles.msgBanner,
                   {
-                    backgroundColor: securityMsg.includes('✓') ? colors.incomeLight : colors.primaryLight
+                    backgroundColor: securityMsg.includes('✓')
+                      ? colors.incomeLight
+                      : colors.primaryLight
                   }
                 ]}
               >
@@ -306,7 +335,9 @@ export default function ServerConfigModal({ visible, onClose }) {
             </Text>
 
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>BACKEND API URL</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
+                BACKEND API URL
+              </Text>
               <View style={[styles.inputBox, clayInput]}>
                 <TextInput
                   style={[styles.textInput, { color: colors.text }]}
@@ -374,7 +405,11 @@ export default function ServerConfigModal({ visible, onClose }) {
 
             {/* Stacked Action Buttons */}
             <View style={styles.actionStack}>
-              <TouchableOpacity onPress={handleSave} style={[styles.saveBtn, clayButton]} activeOpacity={0.85}>
+              <TouchableOpacity
+                onPress={handleSave}
+                style={[styles.saveBtn, clayButton]}
+                activeOpacity={0.85}
+              >
                 <Text style={styles.saveBtnText}>Save Settings</Text>
               </TouchableOpacity>
 

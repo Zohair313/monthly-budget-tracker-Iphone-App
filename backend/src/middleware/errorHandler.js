@@ -1,4 +1,4 @@
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, _next) {
   console.error('🔥 Server Error:', err);
 
   // Handle PostgreSQL specific errors

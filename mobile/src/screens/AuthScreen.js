@@ -16,7 +16,7 @@ import { palette } from '../theme/colors';
 import ServerConfigModal from '../components/ServerConfigModal';
 
 export default function AuthScreen() {
-  const { login, register, themeMode, toggleTheme, demoMode, toggleDemoMode } = useAuth();
+  const { login, register, themeMode, toggleTheme } = useAuth();
   const colors = palette[themeMode] || palette.light;
 
   const [isRegister, setIsRegister] = useState(false);
@@ -96,20 +96,17 @@ export default function AuthScreen() {
             <Ionicons name="wallet" size={32} color={colors.primary} />
           </View>
           <Text style={styles.heroTitle}>Budget Tracker</Text>
-          <Text style={styles.heroSubtitle}>
-            Smart Monthly Financial Management
-          </Text>
+          <Text style={styles.heroSubtitle}>Smart Monthly Financial Management</Text>
         </View>
 
         {/* Executive White Card */}
-        <View style={[styles.authCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View
+          style={[styles.authCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        >
           {/* Segmented Switch */}
           <View style={[styles.tabsWrap, { backgroundColor: colors.surfaceSubtle }]}>
             <TouchableOpacity
-              style={[
-                styles.tabBtn,
-                !isRegister && styles.tabBtnActive
-              ]}
+              style={[styles.tabBtn, !isRegister && styles.tabBtnActive]}
               onPress={() => {
                 setIsRegister(false);
                 setErrorMsg('');
@@ -129,10 +126,7 @@ export default function AuthScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.tabBtn,
-                isRegister && styles.tabBtnActive
-              ]}
+              style={[styles.tabBtn, isRegister && styles.tabBtnActive]}
               onPress={() => {
                 setIsRegister(true);
                 setErrorMsg('');
@@ -157,8 +151,18 @@ export default function AuthScreen() {
             {isRegister && (
               <View style={styles.inputGroup}>
                 <Text style={[styles.label, { color: colors.textSecondary }]}>FULL NAME</Text>
-                <View style={[styles.inputField, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
-                  <Ionicons name="person-outline" size={17} color={colors.textTertiary} style={styles.fieldIcon} />
+                <View
+                  style={[
+                    styles.inputField,
+                    { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }
+                  ]}
+                >
+                  <Ionicons
+                    name="person-outline"
+                    size={17}
+                    color={colors.textTertiary}
+                    style={styles.fieldIcon}
+                  />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
                     placeholder="e.g. John Doe"
@@ -173,8 +177,18 @@ export default function AuthScreen() {
 
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: colors.textSecondary }]}>EMAIL ADDRESS</Text>
-              <View style={[styles.inputField, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
-                <Ionicons name="mail-outline" size={17} color={colors.textTertiary} style={styles.fieldIcon} />
+              <View
+                style={[
+                  styles.inputField,
+                  { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }
+                ]}
+              >
+                <Ionicons
+                  name="mail-outline"
+                  size={17}
+                  color={colors.textTertiary}
+                  style={styles.fieldIcon}
+                />
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
                   placeholder="name@example.com"
@@ -189,8 +203,18 @@ export default function AuthScreen() {
 
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: colors.textSecondary }]}>PASSWORD</Text>
-              <View style={[styles.inputField, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
-                <Ionicons name="lock-closed-outline" size={17} color={colors.textTertiary} style={styles.fieldIcon} />
+              <View
+                style={[
+                  styles.inputField,
+                  { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }
+                ]}
+              >
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={17}
+                  color={colors.textTertiary}
+                  style={styles.fieldIcon}
+                />
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
                   placeholder="••••••••"
@@ -199,7 +223,10 @@ export default function AuthScreen() {
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeBtn}
+                >
                   <Ionicons
                     name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                     size={17}
@@ -232,7 +259,12 @@ export default function AuthScreen() {
             </TouchableOpacity>
 
             {/* Multi-User Security Note */}
-            <View style={[styles.demoFillBtn, { backgroundColor: colors.primaryLight, borderColor: colors.border }]}>
+            <View
+              style={[
+                styles.demoFillBtn,
+                { backgroundColor: colors.primaryLight, borderColor: colors.border }
+              ]}
+            >
               <Ionicons name="shield-checkmark" size={14} color={colors.primary} />
               <Text style={[styles.demoFillText, { color: colors.primary }]}>
                 Private per-email vault • Set PIN & Face ID after login
@@ -241,7 +273,10 @@ export default function AuthScreen() {
 
             {/* Optional Demo Quick Fill */}
             <TouchableOpacity
-              style={[styles.demoFillBtn, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}
+              style={[
+                styles.demoFillBtn,
+                { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }
+              ]}
               onPress={handleFillDemo}
             >
               <Ionicons name="flash-outline" size={14} color={colors.textSecondary} />
@@ -254,9 +289,7 @@ export default function AuthScreen() {
 
         {/* Footer */}
         <View style={styles.footerNote}>
-          <Text style={styles.footerText}>
-            Multi-User Cloud Sync • Neon PostgreSQL
-          </Text>
+          <Text style={styles.footerText}>Multi-User Cloud Sync • Neon PostgreSQL</Text>
         </View>
       </ScrollView>
 

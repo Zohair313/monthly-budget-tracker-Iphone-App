@@ -42,8 +42,10 @@ export default function ExpenseList({ onEditExpense, onAddExpense, activeCategor
 
   // Filter expenses by search query and active category filter
   const filteredExpenses = expenses.filter((exp) => {
-    const matchesCategory = !activeCategory || exp.category.toLowerCase() === activeCategory.toLowerCase();
-    const matchesSearch = !searchQuery.trim() || exp.name.toLowerCase().includes(searchQuery.toLowerCase().trim());
+    const matchesCategory =
+      !activeCategory || exp.category.toLowerCase() === activeCategory.toLowerCase();
+    const matchesSearch =
+      !searchQuery.trim() || exp.name.toLowerCase().includes(searchQuery.toLowerCase().trim());
     return matchesCategory && matchesSearch;
   });
 
@@ -102,7 +104,12 @@ export default function ExpenseList({ onEditExpense, onAddExpense, activeCategor
 
       {/* Clean Search Input Bar */}
       {showSearch && (
-        <View style={[styles.searchBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View
+          style={[
+            styles.searchBox,
+            { backgroundColor: colors.surface, borderColor: colors.border }
+          ]}
+        >
           <Ionicons name="search-outline" size={16} color={colors.textTertiary} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
@@ -145,10 +152,7 @@ export default function ExpenseList({ onEditExpense, onAddExpense, activeCategor
             const iconName = CATEGORY_ICONS[cat] || 'pricetag-outline';
 
             return (
-              <View
-                key={item.id}
-                style={[styles.transactionCard, clayCard]}
-              >
+              <View key={item.id} style={[styles.transactionCard, clayCard]}>
                 {/* Left: Puffy 3D Solid Clay Icon Square (Mockup Style) */}
                 <View
                   style={[
@@ -173,9 +177,7 @@ export default function ExpenseList({ onEditExpense, onAddExpense, activeCategor
                       {formatDate(item.date)}
                     </Text>
                     <View style={styles.metaDot} />
-                    <Text style={[styles.metaCategory, { color: catColor }]}>
-                      {cat}
-                    </Text>
+                    <Text style={[styles.metaCategory, { color: catColor }]}>{cat}</Text>
                   </View>
                 </View>
 

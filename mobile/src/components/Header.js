@@ -1,35 +1,30 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from './Icon';
 import { useAuth } from '../context/AuthContext';
 import { useBudget } from '../context/BudgetContext';
 import { palette } from '../theme/colors';
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
 ];
 
 export default function Header({ onOpenSettings }) {
-  const { user, logout, themeMode, toggleTheme } = useAuth();
+  const { user, themeMode, toggleTheme } = useAuth();
   const { selectedMonth, selectedYear, nextMonth, prevMonth } = useBudget();
   const colors = palette[themeMode] || palette.light;
   const isDark = themeMode === 'dark';
-
-  const handleLogout = () => {
-    Alert.alert(
-      'Log Out',
-      'Are you sure you want to log out of Monthly Budget Tracker?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Log Out',
-          style: 'destructive',
-          onPress: () => logout()
-        }
-      ]
-    );
-  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.topBackdrop }]}>
@@ -88,9 +83,7 @@ export default function Header({ onOpenSettings }) {
           accessibilityLabel="Account & Security Settings"
         >
           <View style={styles.avatarInner}>
-            <Text style={styles.avatarText}>
-              {(user?.name || 'U').charAt(0).toUpperCase()}
-            </Text>
+            <Text style={styles.avatarText}>{(user?.name || 'U').charAt(0).toUpperCase()}</Text>
           </View>
         </TouchableOpacity>
       </View>

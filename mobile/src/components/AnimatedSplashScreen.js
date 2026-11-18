@@ -1,5 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Easing, Dimensions, StatusBar, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  Easing,
+  Dimensions,
+  StatusBar,
+  Platform
+} from 'react-native';
 import Ionicons from './Icon';
 
 const { width, height } = Dimensions.get('screen');
@@ -11,6 +20,8 @@ export default function AnimatedSplashScreen({ onFinish }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const exitAnim = useRef(new Animated.Value(1)).current;
+  const onFinishRef = useRef(onFinish);
+  onFinishRef.current = onFinish;
 
   const [loadingStep, setLoadingStep] = useState('Securing financial vault...');
   const [percentText, setPercentText] = useState('0%');
@@ -81,7 +92,7 @@ export default function AnimatedSplashScreen({ onFinish }) {
         easing: Easing.in(Easing.ease),
         useNativeDriver: USE_NATIVE_DRIVER
       }).start(() => {
-        if (onFinish) onFinish();
+        if (onFinishRef.current) onFinishRef.current();
       });
     }, 1800);
 
@@ -91,7 +102,7 @@ export default function AnimatedSplashScreen({ onFinish }) {
       clearTimeout(t3);
       clearTimeout(t4);
     };
-  }, []);
+  }, [exitAnim, fadeAnim, progressAnim, pulseAnim, scaleAnim]);
 
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],

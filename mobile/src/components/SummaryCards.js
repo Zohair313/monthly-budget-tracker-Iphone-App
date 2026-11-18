@@ -49,12 +49,7 @@ export default function SummaryCards({
   return (
     <View style={styles.wrapper}>
       {/* Curved Violet Clay Backdrop Behind Top Half of Floating Card */}
-      <View
-        style={[
-          styles.curvedBackdrop,
-          { backgroundColor: colors.topBackdrop }
-        ]}
-      />
+      <View style={[styles.curvedBackdrop, { backgroundColor: colors.topBackdrop }]} />
 
       <View style={styles.container}>
         {/* 1. Floating Puffy 3D Clay Debit-Style Balance Card */}
@@ -84,13 +79,18 @@ export default function SummaryCards({
 
             <View style={styles.mastercardWrap}>
               <View style={[styles.mcCircle, { backgroundColor: '#FF4F5A' }]} />
-              <View style={[styles.mcCircle, { backgroundColor: '#FFB300', marginLeft: -12, opacity: 0.92 }]} />
+              <View
+                style={[
+                  styles.mcCircle,
+                  { backgroundColor: '#FFB300', marginLeft: -12, opacity: 0.92 }
+                ]}
+              />
             </View>
           </View>
 
           {/* Row 2: Masked Card Digits */}
           <View style={styles.cardDigitsRow}>
-            <Text style={styles.cardDigits}>••••   ••••   ••••   3432</Text>
+            <Text style={styles.cardDigits}>•••• •••• •••• 3432</Text>
           </View>
 
           {/* Row 3: Exp & Cardholder Name (Clean Mockup Layout) */}

@@ -63,10 +63,7 @@ export default function HomeScreen() {
       style={[styles.safeArea, { backgroundColor: colors.topBackdrop }]}
       edges={['top', 'left', 'right']}
     >
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={colors.topBackdrop}
-      />
+      <StatusBar barStyle="light-content" backgroundColor={colors.topBackdrop} />
 
       {/* 1. Seamless Claymorphism Header Over Violet Backdrop */}
       <Header onOpenSettings={() => setShowServerConfig(true)} />
@@ -137,13 +134,17 @@ export default function HomeScreen() {
               {/* Income Accordion */}
               <IncomeAccordion
                 isExpanded={expandedAccordion === 'income'}
-                onToggle={() => setExpandedAccordion(expandedAccordion === 'income' ? null : 'income')}
+                onToggle={() =>
+                  setExpandedAccordion(expandedAccordion === 'income' ? null : 'income')
+                }
               />
 
               {/* Expense Accordion */}
               <ExpenseAccordion
                 isExpanded={expandedAccordion === 'expense'}
-                onToggle={() => setExpandedAccordion(expandedAccordion === 'expense' ? null : 'expense')}
+                onToggle={() =>
+                  setExpandedAccordion(expandedAccordion === 'expense' ? null : 'expense')
+                }
                 onEditExpense={handleOpenEdit}
               />
 
@@ -182,16 +183,9 @@ export default function HomeScreen() {
             activeOpacity={0.8}
             accessibilityLabel="Overview / All Data"
           >
-            <Ionicons
-              name="home"
-              size={20}
-              color={!showCharts ? '#FFFFFF' : colors.dockInactive}
-            />
+            <Ionicons name="home" size={20} color={!showCharts ? '#FFFFFF' : colors.dockInactive} />
             <Text
-              style={[
-                styles.dockLabel,
-                { color: !showCharts ? '#FFFFFF' : colors.dockInactive }
-              ]}
+              style={[styles.dockLabel, { color: !showCharts ? '#FFFFFF' : colors.dockInactive }]}
             >
               Data
             </Text>
@@ -210,10 +204,7 @@ export default function HomeScreen() {
               color={showCharts ? '#86F0B8' : colors.dockInactive}
             />
             <Text
-              style={[
-                styles.dockLabel,
-                { color: showCharts ? '#86F0B8' : colors.dockInactive }
-              ]}
+              style={[styles.dockLabel, { color: showCharts ? '#86F0B8' : colors.dockInactive }]}
             >
               Charts
             </Text>
@@ -243,14 +234,8 @@ export default function HomeScreen() {
             activeOpacity={0.8}
             accessibilityLabel="Export Statement"
           >
-            <Ionicons
-              name="document-text"
-              size={20}
-              color={colors.dockInactive}
-            />
-            <Text style={[styles.dockLabel, { color: colors.dockInactive }]}>
-              Report
-            </Text>
+            <Ionicons name="document-text" size={20} color={colors.dockInactive} />
+            <Text style={[styles.dockLabel, { color: colors.dockInactive }]}>Report</Text>
           </TouchableOpacity>
 
           {/* Nav 5: Setting */}
@@ -260,14 +245,8 @@ export default function HomeScreen() {
             activeOpacity={0.8}
             accessibilityLabel="Settings"
           >
-            <Ionicons
-              name="settings"
-              size={20}
-              color={colors.dockInactive}
-            />
-            <Text style={[styles.dockLabel, { color: colors.dockInactive }]}>
-              Setting
-            </Text>
+            <Ionicons name="settings" size={20} color={colors.dockInactive} />
+            <Text style={[styles.dockLabel, { color: colors.dockInactive }]}>Setting</Text>
           </TouchableOpacity>
         </View>
       </View>

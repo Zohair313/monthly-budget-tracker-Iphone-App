@@ -6,7 +6,7 @@ const BudgetContext = createContext(null);
 
 export const BudgetProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  
+
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1); // 1 - 12
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
@@ -27,32 +27,35 @@ export const BudgetProvider = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [lastWarning, setLastWarning] = useState(null);
 
-  const fetchMonthData = useCallback(async (month = selectedMonth, year = selectedYear) => {
-    if (!isAuthenticated) return;
-    setIsLoading(true);
-    setErrorMessage(null);
+  const fetchMonthData = useCallback(
+    async (month = selectedMonth, year = selectedYear) => {
+      if (!isAuthenticated) return;
+      setIsLoading(true);
+      setErrorMessage(null);
 
-    try {
-      // 1. Fetch income & dynamic balance calculation
-      const incomeRes = await api.request(`/api/income?month=${month}&year=${year}`);
-      if (incomeRes.success && incomeRes.data) {
-        setIncomeData(incomeRes.data.income);
-        setSummary(incomeRes.data.summary);
-      }
+      try {
+        // 1. Fetch income & dynamic balance calculation
+        const incomeRes = await api.request(`/api/income?month=${month}&year=${year}`);
+        if (incomeRes.success && incomeRes.data) {
+          setIncomeData(incomeRes.data.income);
+          setSummary(incomeRes.data.summary);
+        }
 
-      // 2. Fetch expenses list for this month
-      const expenseRes = await api.request(`/api/expenses?month=${month}&year=${year}`);
-      if (expenseRes.success) {
-        setExpenses(expenseRes.expenses || []);
-        setCategoryBreakdown(expenseRes.category_breakdown || {});
+        // 2. Fetch expenses list for this month
+        const expenseRes = await api.request(`/api/expenses?month=${month}&year=${year}`);
+        if (expenseRes.success) {
+          setExpenses(expenseRes.expenses || []);
+          setCategoryBreakdown(expenseRes.category_breakdown || {});
+        }
+      } catch (err) {
+        console.warn('Error fetching month data:', err.message);
+        setErrorMessage(err.message);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.warn('Error fetching month data:', err.message);
-      setErrorMessage(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated, selectedMonth, selectedYear]);
+    },
+    [isAuthenticated, selectedMonth, selectedYear]
+  );
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -69,18 +72,18 @@ export const BudgetProvider = ({ children }) => {
   const nextMonth = () => {
     if (selectedMonth === 12) {
       setSelectedMonth(1);
-      setSelectedYear(y => y + 1);
+      setSelectedYear((y) => y + 1);
     } else {
-      setSelectedMonth(m => m + 1);
+      setSelectedMonth((m) => m + 1);
     }
   };
 
   const prevMonth = () => {
     if (selectedMonth === 1) {
       setSelectedMonth(12);
-      setSelectedYear(y => y - 1);
+      setSelectedYear((y) => y - 1);
     } else {
-      setSelectedMonth(m => m - 1);
+      setSelectedMonth((m) => m - 1);
     }
   };
 
@@ -129,7 +132,7 @@ export const BudgetProvider = ({ children }) => {
       if (res.success) {
         // Update summary and prepend expense
         if (res.summary) setSummary(res.summary);
-        if (res.expense) setExpenses(prev => [res.expense, ...prev]);
+        if (res.expense) setExpenses((prev) => [res.expense, ...prev]);
         if (res.warning && res.warning.exceeded) {
           setLastWarning(res.warning.message);
         }
@@ -158,7 +161,7 @@ export const BudgetProvider = ({ children }) => {
       if (res.success) {
         if (res.summary) setSummary(res.summary);
         if (res.expense) {
-          setExpenses(prev => prev.map(e => (e.id === id ? res.expense : e)));
+          setExpenses((prev) => prev.map((e) => (e.id === id ? res.expense : e)));
         }
         fetchMonthData(selectedMonth, selectedYear);
       }
@@ -179,7 +182,7 @@ export const BudgetProvider = ({ children }) => {
 
       if (res.success) {
         if (res.summary) setSummary(res.summary);
-        setExpenses(prev => prev.filter(e => e.id !== id));
+        setExpenses((prev) => prev.filter((e) => e.id !== id));
         fetchMonthData(selectedMonth, selectedYear);
       }
       return res;

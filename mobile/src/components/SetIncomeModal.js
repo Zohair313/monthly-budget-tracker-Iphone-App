@@ -1,13 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform
+} from 'react-native';
 import Ionicons from './Icon';
 import { useBudget } from '../context/BudgetContext';
 import { useAuth } from '../context/AuthContext';
 import { palette, getClayCard, getClayInput, getClayPill } from '../theme/colors';
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
 ];
 
 export default function SetIncomeModal({ visible, onClose }) {
@@ -138,8 +157,14 @@ export default function SetIncomeModal({ visible, onClose }) {
                   style={[
                     styles.presetBox,
                     {
-                      backgroundColor: amountStr === String(preset) ? colors.income : colors.surfaceSubtle,
-                      borderColor: amountStr === String(preset) ? colors.income : (isDark ? '#334155' : '#E2E8F0')
+                      backgroundColor:
+                        amountStr === String(preset) ? colors.income : colors.surfaceSubtle,
+                      borderColor:
+                        amountStr === String(preset)
+                          ? colors.income
+                          : isDark
+                            ? '#334155'
+                            : '#E2E8F0'
                     }
                   ]}
                   activeOpacity={0.7}

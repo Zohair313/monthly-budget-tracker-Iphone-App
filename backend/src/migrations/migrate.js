@@ -15,7 +15,9 @@ async function runMigration() {
   if (!connectionString) {
     console.error('❌ Error: DATABASE_URL is not defined in .env file.');
     console.log('Please provide a valid Neon PostgreSQL connection string:');
-    console.log('Example: DATABASE_URL="postgresql://user:password@ep-xyz.us-east-2.aws.neon.tech/neondb?sslmode=require"');
+    console.log(
+      'Example: DATABASE_URL="postgresql://user:password@ep-xyz.us-east-2.aws.neon.tech/neondb?sslmode=require"'
+    );
     process.exit(1);
   }
 

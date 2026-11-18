@@ -1,0 +1,7 @@
+node_modules/
+backend/node_modules/
+backend/public/
+mobile/node_modules/
+mobile/dist/
+mobile/.expo/
+package-lock.json

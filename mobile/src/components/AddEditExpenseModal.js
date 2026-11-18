@@ -13,10 +13,17 @@ import {
 import Ionicons from './Icon';
 import { useBudget } from '../context/BudgetContext';
 import { useAuth } from '../context/AuthContext';
-import { palette, getClayCard, getClayButton, getClayInput, getClayPill } from '../theme/colors';
+import { palette, getClayCard, getClayInput, getClayPill } from '../theme/colors';
 
 const CATEGORIES = [
-  'General', 'Food', 'Bills', 'Travel', 'Shopping', 'Health', 'Entertainment', 'Education'
+  'General',
+  'Food',
+  'Bills',
+  'Travel',
+  'Shopping',
+  'Health',
+  'Entertainment',
+  'Education'
 ];
 
 const CATEGORY_ICONS = {
@@ -64,7 +71,11 @@ export default function AddEditExpenseModal({ visible, onClose, editingExpense }
         setName(editingExpense.name || editingExpense.title || '');
         setAmountStr(String(editingExpense.amount || ''));
         setCategory(editingExpense.category || 'General');
-        setDate(editingExpense.date ? editingExpense.date.split('T')[0] : new Date().toISOString().split('T')[0]);
+        setDate(
+          editingExpense.date
+            ? editingExpense.date.split('T')[0]
+            : new Date().toISOString().split('T')[0]
+        );
       } else {
         setName('');
         setAmountStr('');
@@ -171,7 +182,12 @@ export default function AddEditExpenseModal({ visible, onClose, editingExpense }
             <View style={styles.inputGroup}>
               <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>EXPENSE NAME</Text>
               <View style={[styles.inputBox, clayInput, { backgroundColor: colors.surfaceSubtle }]}>
-                <Ionicons name="pricetag-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
+                <Ionicons
+                  name="pricetag-outline"
+                  size={18}
+                  color={colors.textTertiary}
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={[styles.textInput, { color: colors.text }]}
                   placeholder="e.g. Grocery Shopping, Electricity Bill"
@@ -185,7 +201,9 @@ export default function AddEditExpenseModal({ visible, onClose, editingExpense }
 
             {/* Field 2: Amount (Full Width Box - Identical Size) */}
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>AMOUNT (PKR / RS)</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
+                AMOUNT (PKR / RS)
+              </Text>
               <View style={[styles.inputBox, clayInput, { backgroundColor: colors.surfaceSubtle }]}>
                 <Text style={[styles.currencyPrefix, { color: colors.expense }]}>Rs.</Text>
                 <TextInput
@@ -217,7 +235,8 @@ export default function AddEditExpenseModal({ visible, onClose, editingExpense }
                     Expense Exceeds Remaining Balance
                   </Text>
                   <Text style={[styles.warningText, { color: colors.textSecondary }]}>
-                    Adding this puts your balance in deficit by Rs. {deficitAmount.toLocaleString()}.
+                    Adding this puts your balance in deficit by Rs. {deficitAmount.toLocaleString()}
+                    .
                   </Text>
                 </View>
               </View>
@@ -225,7 +244,9 @@ export default function AddEditExpenseModal({ visible, onClose, editingExpense }
 
             {/* Field 3: Category (Symmetric 4x2 Grid with EQUAL Box Sizes) */}
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>SELECT CATEGORY</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
+                SELECT CATEGORY
+              </Text>
               <View style={styles.equalGrid}>
                 {CATEGORIES.map((cat) => {
                   const isSelected = category === cat;
@@ -241,7 +262,7 @@ export default function AddEditExpenseModal({ visible, onClose, editingExpense }
                         styles.equalCategoryBox,
                         {
                           backgroundColor: isSelected ? catColor : colors.surfaceSubtle,
-                          borderColor: isSelected ? catColor : (isDark ? '#334155' : '#E2E8F0'),
+                          borderColor: isSelected ? catColor : isDark ? '#334155' : '#E2E8F0',
                           borderWidth: isSelected ? 1.5 : 1
                         }
                       ]}
@@ -271,9 +292,16 @@ export default function AddEditExpenseModal({ visible, onClose, editingExpense }
 
             {/* Field 4: Date (Full Width Box - Identical Size) */}
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>DATE (YYYY-MM-DD)</Text>
+              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
+                DATE (YYYY-MM-DD)
+              </Text>
               <View style={[styles.inputBox, clayInput, { backgroundColor: colors.surfaceSubtle }]}>
-                <Ionicons name="calendar-outline" size={18} color={colors.textTertiary} style={styles.inputIcon} />
+                <Ionicons
+                  name="calendar-outline"
+                  size={18}
+                  color={colors.textTertiary}
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={[styles.textInput, { color: colors.text }]}
                   placeholder="2026-11-17"
@@ -318,7 +346,11 @@ export default function AddEditExpenseModal({ visible, onClose, editingExpense }
                   color="#FFFFFF"
                 />
                 <Text style={styles.primarySubmitBtnText}>
-                  {isSubmitting ? 'Saving...' : editingExpense ? 'Update Expense Record' : 'Add Expense Record'}
+                  {isSubmitting
+                    ? 'Saving...'
+                    : editingExpense
+                      ? 'Update Expense Record'
+                      : 'Add Expense Record'}
                 </Text>
               </TouchableOpacity>
 

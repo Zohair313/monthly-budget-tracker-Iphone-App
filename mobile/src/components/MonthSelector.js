@@ -6,8 +6,18 @@ import { useAuth } from '../context/AuthContext';
 import { palette, getClayCard, getClayPill } from '../theme/colors';
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
 ];
 
 export default function MonthSelector() {
@@ -18,7 +28,8 @@ export default function MonthSelector() {
   const clayPill = getClayPill(themeMode);
 
   const currentDate = new Date();
-  const isCurrentMonth = selectedMonth === (currentDate.getMonth() + 1) && selectedYear === currentDate.getFullYear();
+  const isCurrentMonth =
+    selectedMonth === currentDate.getMonth() + 1 && selectedYear === currentDate.getFullYear();
 
   const handleJumpToCurrent = () => {
     changeMonth(currentDate.getMonth() + 1, currentDate.getFullYear());
@@ -73,7 +84,9 @@ export default function MonthSelector() {
                 }
               ]}
             >
-              <Text style={[styles.jumpBadgeText, { color: colors.textSecondary }]}>Jump to Today</Text>
+              <Text style={[styles.jumpBadgeText, { color: colors.textSecondary }]}>
+                Jump to Today
+              </Text>
             </TouchableOpacity>
           )}
         </View>

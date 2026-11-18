@@ -11,7 +11,7 @@ async function seed() {
     const passwordHash = await bcrypt.hash(demoPassword, salt);
 
     // 1. Create or fetch demo user
-    let userResult = await db.query('SELECT * FROM users WHERE email = $1', [demoEmail]);
+    const userResult = await db.query('SELECT * FROM users WHERE email = $1', [demoEmail]);
     let user;
     if (userResult.rows.length === 0) {
       const insertUser = await db.query(

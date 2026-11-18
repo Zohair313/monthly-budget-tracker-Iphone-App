@@ -3,9 +3,9 @@ export const palette = {
   light: {
     name: 'light',
     // Canvas & Curved Backdrop
-    background: '#F6F6FC',           // Soft Porcelain Lavender-White Canvas
+    background: '#F6F6FC', // Soft Porcelain Lavender-White Canvas
     sheetBackground: '#F6F6FC',
-    topBackdrop: '#7A63F1',          // Vibrant Soft Clay Violet Header Backdrop
+    topBackdrop: '#7A63F1', // Vibrant Soft Clay Violet Header Backdrop
     topBackdropDark: '#634BD9',
     topHeaderBg: '#7A63F1',
 

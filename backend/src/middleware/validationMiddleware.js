@@ -43,10 +43,9 @@ function validateLogin(req, res, next) {
 }
 
 function validateIncome(req, res, next) {
-  let { month, year, amount } = req.body;
-
-  month = parseInt(month, 10);
-  year = parseInt(year, 10);
+  const { amount } = req.body;
+  const month = parseInt(req.body.month, 10);
+  const year = parseInt(req.body.year, 10);
   const numAmount = parseFloat(amount);
 
   if (isNaN(month) || month < 1 || month > 12) {
@@ -77,7 +76,8 @@ function validateIncome(req, res, next) {
 }
 
 function validateExpense(req, res, next) {
-  let { name, amount, month, year, category, date } = req.body;
+  const { name, amount, category, date } = req.body;
+  let { month, year } = req.body;
 
   if (!name || typeof name !== 'string' || name.trim().length === 0) {
     return res.status(400).json({

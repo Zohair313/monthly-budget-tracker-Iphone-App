@@ -11,6 +11,8 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(` Running on: http://localhost:${PORT}`);
   console.log(` Health check: http://localhost:${PORT}/api/health`);
   console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(` Database: ${process.env.DATABASE_URL ? 'Neon PostgreSQL' : 'In-Memory PostgreSQL Engine'}`);
+  console.log(
+    ` Database: ${process.env.DATABASE_URL ? 'Neon PostgreSQL' : 'In-Memory PostgreSQL Engine'}`
+  );
   console.log(`===============================================`);
 });

@@ -37,7 +37,11 @@ export default function AppLockScreen({
     setPin('');
     Animated.sequence([
       Animated.timing(shakeAnim, { toValue: 12, duration: 55, useNativeDriver: USE_NATIVE_DRIVER }),
-      Animated.timing(shakeAnim, { toValue: -12, duration: 55, useNativeDriver: USE_NATIVE_DRIVER }),
+      Animated.timing(shakeAnim, {
+        toValue: -12,
+        duration: 55,
+        useNativeDriver: USE_NATIVE_DRIVER
+      }),
       Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: USE_NATIVE_DRIVER }),
       Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: USE_NATIVE_DRIVER }),
       Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: USE_NATIVE_DRIVER })
@@ -60,11 +64,14 @@ export default function AppLockScreen({
     }
   };
 
+  const handleBiometricRef = useRef(handleBiometric);
+  handleBiometricRef.current = handleBiometric;
+
   // Auto-prompt Face ID when opening locked vault
   useEffect(() => {
     if (mode === 'unlock' && biometricEnabled && userKey) {
       const t = setTimeout(() => {
-        handleBiometric();
+        handleBiometricRef.current();
       }, 350);
       return () => clearTimeout(t);
     }
@@ -137,13 +144,16 @@ export default function AppLockScreen({
         <View style={styles.orbBottom} />
 
         <View style={styles.faceOfferCard}>
-          <View style={[styles.lockCoin, { backgroundColor: '#45CF87', borderBottomColor: '#24A462' }]}>
+          <View
+            style={[styles.lockCoin, { backgroundColor: '#45CF87', borderBottomColor: '#24A462' }]}
+          >
             <Ionicons name="scan-outline" size={38} color="#FFFFFF" />
           </View>
 
           <Text style={styles.title}>4-Digit PIN Saved!</Text>
           <Text style={styles.subtitle}>
-            Enable Face ID / Touch ID on this iPhone for instant unlock? You can change this anytime in Settings.
+            Enable Face ID / Touch ID on this iPhone for instant unlock? You can change this anytime
+            in Settings.
           </Text>
 
           {errorMsg.length > 0 && (
@@ -240,12 +250,7 @@ export default function AppLockScreen({
       </View>
 
       {/* 4 Puffy PIN Dots */}
-      <Animated.View
-        style={[
-          styles.dotsRow,
-          { transform: [{ translateX: shakeAnim }] }
-        ]}
-      >
+      <Animated.View style={[styles.dotsRow, { transform: [{ translateX: shakeAnim }] }]}>
         {[0, 1, 2, 3].map((idx) => {
           const filled = idx < pin.length;
           return (

@@ -24,18 +24,29 @@ export default function SecurityGuideModal({ visible, onSetupNow, onSkip }) {
           <Text style={[styles.title, { color: colors.text }]}>
             Welcome, {user?.name || 'User'}!
           </Text>
-          <Text style={[styles.emailPill, { color: colors.primary, backgroundColor: colors.primaryLight }]}>
+          <Text
+            style={[
+              styles.emailPill,
+              { color: colors.primary, backgroundColor: colors.primaryLight }
+            ]}
+          >
             {user?.email || ''}
           </Text>
 
           {/* Clear Instructions */}
-          <View style={[styles.guideBox, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.guideBox,
+              { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }
+            ]}
+          >
             <View style={styles.stepRow}>
               <View style={[styles.stepBadge, { backgroundColor: colors.primary }]}>
                 <Ionicons name="lock-closed" size={13} color="#FFFFFF" />
               </View>
               <Text style={[styles.stepText, { color: colors.text }]}>
-                Set up a <Text style={styles.bold}>4-Digit PIN & Face ID</Text> now for instant one-tap unlock.
+                Set up a <Text style={styles.bold}>4-Digit PIN & Face ID</Text> now for instant
+                one-tap unlock.
               </Text>
             </View>
 
@@ -44,7 +55,8 @@ export default function SecurityGuideModal({ visible, onSetupNow, onSkip }) {
                 <Ionicons name="settings" size={13} color="#FFFFFF" />
               </View>
               <Text style={[styles.stepText, { color: colors.text }]}>
-                You can change or update your PIN & Face ID anytime from <Text style={styles.bold}>Settings</Text>.
+                You can change or update your PIN & Face ID anytime from{' '}
+                <Text style={styles.bold}>Settings</Text>.
               </Text>
             </View>
 
@@ -53,7 +65,8 @@ export default function SecurityGuideModal({ visible, onSetupNow, onSkip }) {
                 <Ionicons name="mail-outline" size={13} color="#FFFFFF" />
               </View>
               <Text style={[styles.stepText, { color: colors.text }]}>
-                If you skip, you'll simply <Text style={styles.bold}>log in with your email</Text> next time you reopen the app.
+                If you skip, you'll simply <Text style={styles.bold}>log in with your email</Text>{' '}
+                next time you reopen the app.
               </Text>
             </View>
           </View>

@@ -70,9 +70,7 @@ export default function BudgetAlertBanner() {
             <Text style={[styles.percentText, { color: alertColor }]}>{burnRate}%</Text>
           </View>
         </View>
-        <Text style={[styles.description, { color: colors.textSecondary }]}>
-          {description}
-        </Text>
+        <Text style={[styles.description, { color: colors.textSecondary }]}>{description}</Text>
       </View>
     </View>
   );

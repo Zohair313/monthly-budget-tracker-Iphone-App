@@ -10,11 +10,13 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 
 // Enable CORS for mobile apps, standalone PWA, and browsers
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(
+  cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  })
+);
 
 app.use(express.json());
 

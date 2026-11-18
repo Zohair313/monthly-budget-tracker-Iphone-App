@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { AppState, Platform } from 'react-native';
 import { securityService } from '../services/security';
 import { useAuth } from './AuthContext';
@@ -18,16 +18,19 @@ export function SecurityProvider({ children }) {
 
   const backgroundedAt = useRef(null);
 
-  const refreshLockState = async (key = userKey) => {
-    const [state, supported] = await Promise.all([
-      securityService.getLockState(key),
-      securityService.isBiometricSupported()
-    ]);
-    setHasPin(state.hasPin);
-    setBiometricEnabled(state.biometricEnabled);
-    setBiometricSupported(supported);
-    return { state, supported };
-  };
+  const refreshLockState = useCallback(
+    async (key = userKey) => {
+      const [state, supported] = await Promise.all([
+        securityService.getLockState(key),
+        securityService.isBiometricSupported()
+      ]);
+      setHasPin(state.hasPin);
+      setBiometricEnabled(state.biometricEnabled);
+      setBiometricSupported(supported);
+      return { state, supported };
+    },
+    [userKey]
+  );
 
   // Sync per-user security state whenever authenticated user changes
   useEffect(() => {
@@ -63,7 +66,7 @@ export function SecurityProvider({ children }) {
     return () => {
       active = false;
     };
-  }, [isAuthenticated, userKey, sessionSource]);
+  }, [isAuthenticated, userKey, sessionSource, refreshLockState]);
 
   // Auto-lock when returning from background after 15+ seconds (if PIN enabled)
   useEffect(() => {

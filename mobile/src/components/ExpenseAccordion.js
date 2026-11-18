@@ -15,16 +15,11 @@ import {
 import Ionicons from './Icon';
 import { useBudget } from '../context/BudgetContext';
 import { useAuth } from '../context/AuthContext';
-import { palette, getClayCard, getClayInput, getClayPill } from '../theme/colors';
+import { palette, getClayCard, getClayInput } from '../theme/colors';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
 
 const CATEGORIES = [
   { id: 'Food', label: 'Food', icon: 'fast-food', color: '#E11D48', bg: '#FFF1F2' },
@@ -67,7 +62,7 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
       duration: 250,
       useNativeDriver: Platform.OS !== 'web'
     }).start();
-  }, [isExpanded]);
+  }, [isExpanded, rotateAnim]);
 
   const chevronRotate = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -142,30 +137,21 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
         performDelete();
       }
     } else {
-      Alert.alert(
-        'Delete Expense',
-        `Are you sure you want to delete "${itemTitle}"?`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Delete', style: 'destructive', onPress: performDelete }
-        ]
-      );
+      Alert.alert('Delete Expense', `Are you sure you want to delete "${itemTitle}"?`, [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: performDelete }
+      ]);
     }
   };
 
   const totalExpense = summary.total_expense || 0;
   const burnRate = summary.burn_rate_percent || 0;
-  const isOverBudget = summary.remaining_balance !== undefined ? summary.remaining_balance < 0 : false;
+  const isOverBudget =
+    summary.remaining_balance !== undefined ? summary.remaining_balance < 0 : false;
   const isBudgetAlert = summary.is_budget_alert || burnRate >= 80;
 
   return (
-    <View
-      style={[
-        styles.container,
-        clayCard,
-        isExpanded && { borderBottomColor: colors.expense }
-      ]}
-    >
+    <View style={[styles.container, clayCard, isExpanded && { borderBottomColor: colors.expense }]}>
       {/* Accordion Header (Clickable) - Exact 78px Puffy Clay Height */}
       <TouchableOpacity
         style={styles.headerTouch}
@@ -192,7 +178,10 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
 
           <View style={styles.headerTextGroup}>
             <Text style={[styles.accordionTitle, { color: colors.text }]}>Monthly Expenses</Text>
-            <Text style={[styles.accordionSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+            <Text
+              style={[styles.accordionSubtitle, { color: colors.textSecondary }]}
+              numberOfLines={1}
+            >
               {expenses.length} {expenses.length === 1 ? 'item' : 'items'} recorded
             </Text>
           </View>
@@ -222,10 +211,17 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
               <Text
                 style={[
                   styles.statusBarValue,
-                  { color: isOverBudget ? colors.expense : (isBudgetAlert ? colors.warning : colors.income) }
+                  {
+                    color: isOverBudget
+                      ? colors.expense
+                      : isBudgetAlert
+                        ? colors.warning
+                        : colors.income
+                  }
                 ]}
               >
-                {burnRate}% {isOverBudget ? '(Over Budget)' : (isBudgetAlert ? '(Caution 80%)' : '(Safe)')}
+                {burnRate}%{' '}
+                {isOverBudget ? '(Over Budget)' : isBudgetAlert ? '(Caution 80%)' : '(Safe)'}
               </Text>
             </View>
             <View style={styles.progressTrack}>
@@ -234,7 +230,11 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
                   styles.progressBarFill,
                   {
                     width: `${Math.min(burnRate, 100)}%`,
-                    backgroundColor: isOverBudget ? colors.expense : (isBudgetAlert ? colors.warning : colors.primary)
+                    backgroundColor: isOverBudget
+                      ? colors.expense
+                      : isBudgetAlert
+                        ? colors.warning
+                        : colors.primary
                   }
                 ]}
               />
@@ -258,7 +258,10 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
               <Text
                 style={[
                   styles.tabBtnText,
-                  { color: showForm ? colors.primary : colors.textSecondary, fontWeight: showForm ? '800' : '600' }
+                  {
+                    color: showForm ? colors.primary : colors.textSecondary,
+                    fontWeight: showForm ? '800' : '600'
+                  }
                 ]}
               >
                 + Add Expense
@@ -280,7 +283,10 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
               <Text
                 style={[
                   styles.tabBtnText,
-                  { color: !showForm ? colors.primary : colors.textSecondary, fontWeight: !showForm ? '800' : '600' }
+                  {
+                    color: !showForm ? colors.primary : colors.textSecondary,
+                    fontWeight: !showForm ? '800' : '600'
+                  }
                 ]}
               >
                 View Items ({expenses.length})
@@ -336,7 +342,7 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
                         styles.categoryChip,
                         {
                           backgroundColor: isSelected ? cat.color : colors.surfaceSubtle,
-                          borderColor: isSelected ? cat.color : (isDark ? '#334155' : '#E2E8F0'),
+                          borderColor: isSelected ? cat.color : isDark ? '#334155' : '#E2E8F0',
                           borderWidth: isSelected ? 1.5 : 1
                         }
                       ]}
@@ -371,8 +377,12 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
                   style={[
                     styles.feedbackBox,
                     {
-                      backgroundColor: feedbackMsg.includes('✓') ? colors.incomeLight : colors.expenseLight,
-                      borderColor: feedbackMsg.includes('✓') ? colors.incomeBorder : colors.expenseBorder
+                      backgroundColor: feedbackMsg.includes('✓')
+                        ? colors.incomeLight
+                        : colors.expenseLight,
+                      borderColor: feedbackMsg.includes('✓')
+                        ? colors.incomeBorder
+                        : colors.expenseBorder
                     }
                   ]}
                 >
@@ -389,10 +399,7 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
 
               {/* Action Button: Save Expense */}
               <TouchableOpacity
-                style={[
-                  styles.saveBtn,
-                  { backgroundColor: colors.expense }
-                ]}
+                style={[styles.saveBtn, { backgroundColor: colors.expense }]}
                 onPress={handleAddExpense}
                 disabled={isAdding}
                 activeOpacity={0.85}
@@ -422,7 +429,9 @@ export default function ExpenseAccordion({ isExpanded, onToggle, onEditExpense }
                 </View>
               ) : (
                 expenses.map((item) => {
-                  const catMatch = CATEGORIES.find(c => c.id.toLowerCase() === (item.category || '').toLowerCase());
+                  const catMatch = CATEGORIES.find(
+                    (c) => c.id.toLowerCase() === (item.category || '').toLowerCase()
+                  );
                   const catColor = catMatch ? catMatch.color : colors.primary;
                   const catIcon = catMatch ? catMatch.icon : 'pricetag';
                   const isDeleting = deletingId === item.id;

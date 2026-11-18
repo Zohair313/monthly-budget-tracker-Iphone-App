@@ -2,7 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 function normalizeUserKey(userKey) {
-  return String(userKey || 'default').trim().toLowerCase();
+  return String(userKey || 'default')
+    .trim()
+    .toLowerCase();
 }
 
 function keysFor(userKey) {
@@ -130,8 +132,8 @@ export const securityService = {
           displayName: userLabel
         },
         pubKeyCredParams: [
-          { alg: -7, type: 'public-key' },   // ES256 (Apple Face ID / Touch ID)
-          { alg: -257, type: 'public-key' }  // RS256 fallback
+          { alg: -7, type: 'public-key' }, // ES256 (Apple Face ID / Touch ID)
+          { alg: -257, type: 'public-key' } // RS256 fallback
         ],
         authenticatorSelection: {
           authenticatorAttachment: 'platform',

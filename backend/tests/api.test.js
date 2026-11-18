@@ -204,32 +204,38 @@ test('F3, F4, F5, F6, F7 - Expense CRUD and Auto Deduction', async (t) => {
     assert.equal(res.data.expenses[0].name, 'Electricity Bill');
   });
 
-  await t.test('F6 - Edit Expense recalculates balance correctly (8,000 -> 10,000 => balance 90,000)', async () => {
-    const res = await request(`/api/expenses/${expenseId}`, {
-      method: 'PUT',
-      headers: authHeader,
-      body: {
-        name: 'Electricity Bill (Commercial)',
-        amount: 10000
-      }
-    });
+  await t.test(
+    'F6 - Edit Expense recalculates balance correctly (8,000 -> 10,000 => balance 90,000)',
+    async () => {
+      const res = await request(`/api/expenses/${expenseId}`, {
+        method: 'PUT',
+        headers: authHeader,
+        body: {
+          name: 'Electricity Bill (Commercial)',
+          amount: 10000
+        }
+      });
 
-    assert.equal(res.status, 200);
-    assert.equal(res.data.expense.amount, 10000);
-    assert.equal(res.data.summary.total_expense, 10000);
-    assert.equal(res.data.summary.remaining_balance, 90000); // 100,000 - 10,000 = 90,000
-  });
+      assert.equal(res.status, 200);
+      assert.equal(res.data.expense.amount, 10000);
+      assert.equal(res.data.summary.total_expense, 10000);
+      assert.equal(res.data.summary.remaining_balance, 90000); // 100,000 - 10,000 = 90,000
+    }
+  );
 
-  await t.test('F7 - Delete Expense restores amount back to balance (balance back to 100,000)', async () => {
-    const res = await request(`/api/expenses/${expenseId}`, {
-      method: 'DELETE',
-      headers: authHeader
-    });
+  await t.test(
+    'F7 - Delete Expense restores amount back to balance (balance back to 100,000)',
+    async () => {
+      const res = await request(`/api/expenses/${expenseId}`, {
+        method: 'DELETE',
+        headers: authHeader
+      });
 
-    assert.equal(res.status, 200);
-    assert.equal(res.data.summary.total_expense, 0);
-    assert.equal(res.data.summary.remaining_balance, 100000); // Amount restored!
-  });
+      assert.equal(res.status, 200);
+      assert.equal(res.data.summary.total_expense, 0);
+      assert.equal(res.data.summary.remaining_balance, 100000); // Amount restored!
+    }
+  );
 });
 
 test('Validation Rules & Warnings', async (t) => {
