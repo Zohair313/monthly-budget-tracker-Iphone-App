@@ -18,11 +18,11 @@ const memoryStore = {
   expenses: [],
   nextIncomeId: 1,
   nextExpenseId: 1
-};
+}; c
 
 if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
   const isNeon = process.env.DATABASE_URL.includes('neon.tech') || process.env.DATABASE_URL.includes('sslmode=require');
-  
+
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: isNeon ? { rejectUnauthorized: false } : (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false)

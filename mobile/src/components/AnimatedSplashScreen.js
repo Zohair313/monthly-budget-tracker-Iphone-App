@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Easing, Dimensions, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing, Dimensions, StatusBar, Platform } from 'react-native';
 import Ionicons from './Icon';
 
 const { width, height } = Dimensions.get('screen');
+const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
 export default function AnimatedSplashScreen({ onFinish }) {
   const scaleAnim = useRef(new Animated.Value(0.75)).current;
