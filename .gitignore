@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+
+# Expo & Builds
+.expo/
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.ipa
+*.apk
+*.aab
+
+# OS & Logs
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*

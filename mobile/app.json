@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Budget Tracker",
+    "slug": "shah",
+    "owner": "shah-1100s-team",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#7A63F1"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.zohair.budgettracker",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.zohair.budgettracker",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#7A63F1"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/icon.png",
+      "name": "Budget Tracker",
+      "shortName": "Budget",
+      "themeColor": "#7A63F1",
+      "backgroundColor": "#7A63F1",
+      "display": "standalone",
+      "orientation": "portrait"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-status-bar"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "901c114a-9fb4-460c-93ea-27b88692a3ed"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/901c114a-9fb4-460c-93ea-27b88692a3ed"
+    }
+  }
+}
