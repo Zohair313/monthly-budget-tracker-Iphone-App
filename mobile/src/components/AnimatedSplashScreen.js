@@ -22,12 +22,12 @@ export default function AnimatedSplashScreen({ onFinish }) {
         toValue: 1,
         duration: 650,
         easing: Easing.out(Easing.back(1.4)),
-        useNativeDriver: true
+        useNativeDriver: USE_NATIVE_DRIVER
       }),
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 550,
-        useNativeDriver: true
+        useNativeDriver: USE_NATIVE_DRIVER
       })
     ]).start();
 
@@ -38,13 +38,13 @@ export default function AnimatedSplashScreen({ onFinish }) {
           toValue: 1.06,
           duration: 800,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true
+          useNativeDriver: USE_NATIVE_DRIVER
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
           duration: 800,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true
+          useNativeDriver: USE_NATIVE_DRIVER
         })
       ])
     ).start();
@@ -79,7 +79,7 @@ export default function AnimatedSplashScreen({ onFinish }) {
         toValue: 0,
         duration: 350,
         easing: Easing.in(Easing.ease),
-        useNativeDriver: true
+        useNativeDriver: USE_NATIVE_DRIVER
       }).start(() => {
         if (onFinish) onFinish();
       });
