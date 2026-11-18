@@ -18,19 +18,27 @@ const memoryStore = {
   expenses: [],
   nextIncomeId: 1,
   nextExpenseId: 1
-}; c
+};
 
-if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
-  const isNeon = process.env.DATABASE_URL.includes('neon.tech') || process.env.DATABASE_URL.includes('sslmode=require');
+const rawDbUrl = (process.env.DATABASE_URL || '').trim().replace(/^["']|["']$/g, '');
 
-  pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: isNeon ? { rejectUnauthorized: false } : (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false)
-  });
+if (rawDbUrl !== '') {
+  try {
+    const isNeon = rawDbUrl.includes('neon.tech') || rawDbUrl.includes('sslmode=require');
 
-  pool.on('error', (err) => {
-    console.error('Unexpected error on idle database client', err);
-  });
+    pool = new Pool({
+      connectionString: rawDbUrl,
+      max: process.env.VERCEL ? 3 : 10,
+      ssl: isNeon ? { rejectUnauthorized: false } : (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false)
+    });
+
+    pool.on('error', (err) => {
+      console.error('Unexpected error on idle database client', err);
+    });
+  } catch (err) {
+    console.error('Database pool init error, falling back to memory store:', err.message);
+    useMemoryStore = true;
+  }
 } else {
   useMemoryStore = true;
   console.log('ℹ️  No DATABASE_URL configured. Running with high-performance In-Memory PostgreSQL Store for development/testing.');

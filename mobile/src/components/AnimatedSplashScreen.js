@@ -147,8 +147,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    width,
-    height,
+    width: Platform.OS === 'web' ? '100%' : width,
+    height: Platform.OS === 'web' ? '100%' : height,
     backgroundColor: '#7A63F1', // Full screen Claymorphism Soft Violet
     alignItems: 'center',
     justifyContent: 'center',

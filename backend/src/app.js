@@ -32,34 +32,35 @@ app.use('/api/auth', authRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/expenses', expenseRoutes);
 
-// Serve Standalone iPhone PWA Static Bundle from backend/public
-const publicDir = path.join(__dirname, '../public');
-const indexHtmlPath = path.join(publicDir, 'index.html');
+// Serve Standalone iPhone PWA Static Bundle locally / on Render (Vercel Edge CDN serves /public natively)
+if (!process.env.VERCEL) {
+  const publicDir = path.join(__dirname, '../public');
+  const indexHtmlPath = path.join(publicDir, 'index.html');
 
-if (fs.existsSync(publicDir)) {
-  // Set proper caching headers for service worker & manifest
-  app.use((req, res, next) => {
-    if (req.path === '/sw.js' || req.path === '/manifest.json') {
-      res.setHeader('Cache-Control', 'no-cache');
-    }
-    next();
-  });
+  if (fs.existsSync(publicDir)) {
+    app.use((req, res, next) => {
+      if (req.path === '/sw.js' || req.path === '/manifest.json') {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+      next();
+    });
 
-  app.use(express.static(publicDir));
-}
-
-// SPA Fallback for non-API routes
-app.get(/^(?!\/api).*/, (req, res) => {
-  if (fs.existsSync(indexHtmlPath)) {
-    return res.sendFile(indexHtmlPath);
+    app.use(express.static(publicDir));
   }
-  return res.status(200).json({
-    success: true,
-    service: 'Monthly Budget Tracker REST API',
-    status: 'online',
-    version: '1.0.0'
+
+  // SPA Fallback for non-API routes
+  app.get(/^(?!\/api).*/, (req, res) => {
+    if (fs.existsSync(indexHtmlPath)) {
+      return res.sendFile(indexHtmlPath);
+    }
+    return res.status(200).json({
+      success: true,
+      service: 'Monthly Budget Tracker REST API',
+      status: 'online',
+      version: '1.0.0'
+    });
   });
-});
+}
 
 // Catch 404 for unknown /api routes
 app.use((req, res) => {

@@ -21,6 +21,19 @@ function copyRecursive(src, dest) {
   }
 }
 
+function findFiles(dir, ext, results = []) {
+  if (!fs.existsSync(dir)) return results;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      findFiles(full, ext, results);
+    } else if (entry.name.endsWith(ext)) {
+      results.push(full);
+    }
+  }
+  return results;
+}
+
 if (!fs.existsSync(distDir)) {
   console.error('Error: mobile/dist does not exist. Run "npx expo export --platform web" first.');
   process.exit(1);
@@ -32,14 +45,50 @@ if (fs.existsSync(publicDir)) {
 }
 copyRecursive(distDir, publicDir);
 
-// 2. Copy 3D Claymorphism App Icon for iOS & Android PWA
+// 2. Relocate fonts out of assets/node_modules/ into /fonts/ so Git & Vercel never ignore them
+const fontsDir = path.join(publicDir, 'fonts');
+fs.mkdirSync(fontsDir, { recursive: true });
+
+const ttfFiles = findFiles(path.join(publicDir, 'assets'), '.ttf');
+const jsBundles = findFiles(path.join(publicDir, '_expo'), '.js');
+const preloadLinks = [];
+
+for (const ttfPath of ttfFiles) {
+  const fileName = path.basename(ttfPath);
+  const relOld = '/' + path.relative(publicDir, ttfPath).replace(/\\/g, '/');
+  const relOldNoSlash = relOld.slice(1);
+  const relNew = `/fonts/${fileName}`;
+  const relNewNoSlash = `fonts/${fileName}`;
+
+  fs.copyFileSync(ttfPath, path.join(fontsDir, fileName));
+  preloadLinks.push(`<link rel="preload" href="${relNew}" as="font" type="font/ttf" crossorigin="anonymous" />`);
+
+  for (const jsPath of jsBundles) {
+    let js = fs.readFileSync(jsPath, 'utf8');
+    const updated = js
+      .split(relOld).join(relNew)
+      .split(relOldNoSlash).join(relNewNoSlash);
+    if (updated !== js) {
+      fs.writeFileSync(jsPath, updated, 'utf8');
+      console.log(`✓ Rewrote font path in ${path.basename(jsPath)} -> ${relNew}`);
+    }
+  }
+}
+
+// Remove assets/node_modules directory completely so no node_modules path exists in public/
+const assetsNodeModules = path.join(publicDir, 'assets', 'node_modules');
+if (fs.existsSync(assetsNodeModules)) {
+  fs.rmSync(assetsNodeModules, { recursive: true, force: true });
+}
+
+// 3. Copy 3D Claymorphism App Icon for iOS & Android PWA
 if (fs.existsSync(iconSrc)) {
   fs.copyFileSync(iconSrc, path.join(publicDir, 'icon.png'));
   fs.copyFileSync(iconSrc, path.join(publicDir, 'apple-touch-icon.png'));
   fs.copyFileSync(iconSrc, path.join(publicDir, 'favicon.png'));
 }
 
-// 3. Write Web App Manifest (Standalone App Mode)
+// 4. Write Web App Manifest (Standalone App Mode)
 const manifest = {
   name: 'Budget Tracker',
   short_name: 'Budget',
@@ -66,8 +115,8 @@ const manifest = {
 };
 fs.writeFileSync(path.join(publicDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
-// 4. Write Lightweight Service Worker for Instant Standalone Launch
-const swContent = `const CACHE_NAME = 'budget-tracker-pwa-v1';
+// 5. Write Lightweight Service Worker (v2 busts old cache)
+const swContent = `const CACHE_NAME = 'budget-tracker-pwa-v2';
 const APP_SHELL = ['/', '/manifest.json', '/icon.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {
@@ -88,7 +137,6 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  // Always bypass cache for live API requests
   if (url.pathname.startsWith('/api/')) {
     return;
   }
@@ -107,7 +155,7 @@ self.addEventListener('fetch', (event) => {
 `;
 fs.writeFileSync(path.join(publicDir, 'sw.js'), swContent);
 
-// 5. Enhance index.html with Full iPhone Standalone PWA Meta Tags & Safe Area CSS
+// 6. Enhance index.html with Full iPhone Standalone PWA Meta Tags, Font Preload & Safe Area CSS
 const indexPath = path.join(publicDir, 'index.html');
 let html = fs.readFileSync(indexPath, 'utf8');
 
@@ -122,6 +170,7 @@ const pwaHeadTags = `
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="apple-touch-icon" sizes="1024x1024" href="/icon.png" />
   <link rel="icon" type="image/png" href="/favicon.png" />
+  ${preloadLinks.join('\n  ')}
   <style>
     html, body, #root {
       height: 100%;
@@ -158,7 +207,6 @@ const pwaHeadTags = `
   </style>
 `;
 
-// Remove default viewport tag if present to avoid duplicates
 html = html.replace(/<meta name="viewport"[^>]*>/i, '');
 html = html.replace('</head>', `${pwaHeadTags}\n</head>`);
 
@@ -174,4 +222,4 @@ const swScript = `
 html = html.replace('</body>', `${swScript}\n</body>`);
 
 fs.writeFileSync(indexPath, html, 'utf8');
-console.log('✓ Standalone iPhone PWA built successfully into backend/public!');
+console.log('✓ Standalone iPhone PWA built successfully into backend/public with relocated /fonts/!');

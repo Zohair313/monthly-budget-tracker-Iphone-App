@@ -1,4 +1,4 @@
-const CACHE_NAME = 'budget-tracker-pwa-v1';
+const CACHE_NAME = 'budget-tracker-pwa-v2';
 const APP_SHELL = ['/', '/manifest.json', '/icon.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {
@@ -19,7 +19,6 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  // Always bypass cache for live API requests
   if (url.pathname.startsWith('/api/')) {
     return;
   }
