@@ -1,9 +1,9 @@
-const CACHE_NAME = 'budget-tracker-pwa-v4';
-const APP_SHELL = ['/', '/manifest.json', '/icon.png', '/apple-touch-icon.png'];
+const CACHE_NAME = 'budget-tracker-pwa-v5';
+const STATIC_ASSETS = ['/icon.png', '/apple-touch-icon.png', '/favicon.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).catch(() => {})
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)).catch(() => {})
   );
   self.skipWaiting();
 });
@@ -19,18 +19,31 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  if (url.pathname.startsWith('/api/')) {
+  // Always let network handle API, HTML navigations, and JS bundles directly (no stale bundle mismatch!)
+  if (
+    event.request.method !== 'GET' ||
+    event.request.mode === 'navigate' ||
+    url.pathname === '/' ||
+    url.pathname.endsWith('.html') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.startsWith('/api/')
+  ) {
     return;
   }
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (event.request.method === 'GET' && response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone)).catch(() => {});
-        }
-        return response;
+
+  // Only cache fonts and icons
+  if (url.pathname.startsWith('/fonts/') || url.pathname.endsWith('.png') || url.pathname.endsWith('.ttf')) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone)).catch(() => {});
+          }
+          return response;
+        });
       })
-      .catch(() => caches.match(event.request))
-  );
+    );
+  }
 });

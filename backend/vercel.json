@@ -12,11 +12,20 @@
   ],
   "headers": [
     {
-      "source": "/(sw\\.js|manifest\\.json)",
+      "source": "/",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-cache"
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(index\\.html|sw\\.js|manifest\\.json)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
         }
       ]
     }
