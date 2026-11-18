@@ -116,7 +116,7 @@ const manifest = {
 fs.writeFileSync(path.join(publicDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
 // 5. Write Lightweight Service Worker (v2 busts old cache)
-const swContent = `const CACHE_NAME = 'budget-tracker-pwa-v2';
+const swContent = `const CACHE_NAME = 'budget-tracker-pwa-v3';
 const APP_SHELL = ['/', '/manifest.json', '/icon.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {

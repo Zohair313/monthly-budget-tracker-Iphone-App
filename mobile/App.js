@@ -3,9 +3,11 @@ import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'rea
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { BudgetProvider } from './src/context/BudgetContext';
+import { SecurityProvider, useSecurity } from './src/context/SecurityContext';
 import AuthScreen from './src/screens/AuthScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import AnimatedSplashScreen from './src/components/AnimatedSplashScreen';
+import AppLockScreen from './src/components/AppLockScreen';
 import { palette } from './src/theme/colors';
 
 // Fallback Error Boundary to display runtime errors gracefully
@@ -43,7 +45,15 @@ class ErrorBoundary extends Component {
 
 function RootNavigator() {
   const { isAuthenticated, isLoading, themeMode } = useAuth();
-  const colors = palette[themeMode] || palette.dark;
+  const {
+    isLocked,
+    isSettingUpPin,
+    biometricEnabled,
+    unlock,
+    finishPinSetup,
+    cancelPinSetup
+  } = useSecurity();
+  const colors = palette[themeMode] || palette.light;
 
   if (isLoading) {
     return (
@@ -65,6 +75,24 @@ function RootNavigator() {
       ) : (
         <AuthScreen />
       )}
+
+      {/* Full-Screen 3D Claymorphism PIN / Face ID Lock Overlay */}
+      {isLocked && (
+        <AppLockScreen
+          mode="unlock"
+          biometricEnabled={biometricEnabled}
+          onUnlock={unlock}
+        />
+      )}
+
+      {/* Full-Screen 4-Digit PIN Setup Flow */}
+      {isSettingUpPin && (
+        <AppLockScreen
+          mode="setup"
+          onUnlock={finishPinSetup}
+          onCancel={cancelPinSetup}
+        />
+      )}
     </View>
   );
 }
@@ -84,7 +112,9 @@ export default function App() {
     <SafeAreaProvider style={styles.rootFill}>
       <ErrorBoundary>
         <AuthProvider>
-          <RootNavigator />
+          <SecurityProvider>
+            <RootNavigator />
+          </SecurityProvider>
         </AuthProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
