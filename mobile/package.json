@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "expo export --platform web",
+    "build:pwa": "expo export --platform web && node scripts/build-pwa.js",
     "start": "expo start",
     "tunnel": "expo start --tunnel",
     "android": "expo start --android",

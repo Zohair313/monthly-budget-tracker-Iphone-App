@@ -16,6 +16,7 @@ import { palette } from '../theme/colors';
 
 import Header from '../components/Header';
 import SummaryCards from '../components/SummaryCards';
+import InstallPromptBanner from '../components/InstallPromptBanner';
 import BudgetAlertBanner from '../components/BudgetAlertBanner';
 import MonthComparisonCard from '../components/MonthComparisonCard';
 import CategoryBreakdown from '../components/CategoryBreakdown';
@@ -108,6 +109,9 @@ export default function HomeScreen() {
 
           {/* 3. Main Budget Content Area */}
           <View style={[styles.mainContentSheet, { backgroundColor: colors.background }]}>
+            {/* iOS Safari Standalone Install Tip (auto-hides once installed) */}
+            <InstallPromptBanner />
+
             {/* Budget Alert Banner */}
             <BudgetAlertBanner />
 

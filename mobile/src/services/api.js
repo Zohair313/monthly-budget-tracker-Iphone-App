@@ -11,10 +11,18 @@ const STORAGE_KEYS = {
 
 // Default Backend URL based on platform
 const getDefaultBaseUrl = () => {
+  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
+    const { hostname, port, origin } = window.location;
+    // In production (Render / custom domain) or when served directly from Express port 5000
+    if ((hostname !== 'localhost' && hostname !== '127.0.0.1') || port === '5000') {
+      return origin;
+    }
+    return 'http://localhost:5000';
+  }
   if (Platform.OS === 'android') {
     return 'http://10.0.2.2:5000';
   }
-  // iOS simulator or Web
+  // iOS simulator or native fallback
   return 'http://localhost:5000';
 };
 
@@ -30,7 +38,15 @@ class ApiService {
     if (this.initialized) return;
     try {
       const storedUrl = await AsyncStorage.getItem(STORAGE_KEYS.API_URL);
-      if (storedUrl) this.baseUrl = storedUrl;
+      const isProdWeb =
+        Platform.OS === 'web' &&
+        typeof window !== 'undefined' &&
+        window.location &&
+        window.location.hostname !== 'localhost' &&
+        window.location.hostname !== '127.0.0.1';
+      if (storedUrl && !(isProdWeb && storedUrl.includes('localhost'))) {
+        this.baseUrl = storedUrl;
+      }
 
       const storedToken = await AsyncStorage.getItem(STORAGE_KEYS.TOKEN);
       if (storedToken) this.token = storedToken;

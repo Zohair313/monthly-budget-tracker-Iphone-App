@@ -1,0 +1,24 @@
+{
+  "name": "Budget Tracker",
+  "short_name": "Budget",
+  "description": "3D Claymorphism Monthly Budget Tracker",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#7A63F1",
+  "theme_color": "#7A63F1",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

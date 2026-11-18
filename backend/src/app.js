@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
@@ -7,7 +9,7 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// Enable CORS for mobile apps, Expo Go, Web, and emulators
+// Enable CORS for mobile apps, standalone PWA, and browsers
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -16,41 +18,50 @@ app.use(cors({
 
 app.use(express.json());
 
-// Ignore favicon requests
-app.get('/favicon.ico', (req, res) => res.status(204).end());
-
-// Root Welcome Endpoint
-app.get('/', (req, res) => {
-  res.status(200).json({
-    success: true,
-    service: 'Monthly Budget Tracker REST API',
-    status: 'online',
-    version: '1.0.0',
-    documentation: 'https://github.com/Zohair313/monthly-budget-tracker#readme',
-    endpoints: {
-      health: '/api/health',
-      auth: ['POST /api/auth/register', 'POST /api/auth/login', 'GET /api/auth/profile'],
-      income: ['POST /api/income', 'GET /api/income?month=&year='],
-      expenses: ['POST /api/expenses', 'GET /api/expenses?month=&year=', 'PUT /api/expenses/:id', 'DELETE /api/expenses/:id']
-    }
-  });
-});
-
 // API Health Check
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
-    service: 'Monthly Budget Tracker API',
+    service: 'Monthly Budget Tracker Standalone App API',
     timestamp: new Date().toISOString()
   });
 });
 
-// Mount Routes
+// Mount API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/expenses', expenseRoutes);
 
-// Catch 404
+// Serve Standalone iPhone PWA Static Bundle from backend/public
+const publicDir = path.join(__dirname, '../public');
+const indexHtmlPath = path.join(publicDir, 'index.html');
+
+if (fs.existsSync(publicDir)) {
+  // Set proper caching headers for service worker & manifest
+  app.use((req, res, next) => {
+    if (req.path === '/sw.js' || req.path === '/manifest.json') {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+    next();
+  });
+
+  app.use(express.static(publicDir));
+}
+
+// SPA Fallback for non-API routes
+app.get(/^(?!\/api).*/, (req, res) => {
+  if (fs.existsSync(indexHtmlPath)) {
+    return res.sendFile(indexHtmlPath);
+  }
+  return res.status(200).json({
+    success: true,
+    service: 'Monthly Budget Tracker REST API',
+    status: 'online',
+    version: '1.0.0'
+  });
+});
+
+// Catch 404 for unknown /api routes
 app.use((req, res) => {
   res.status(404).json({
     success: false,
