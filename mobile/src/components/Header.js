@@ -82,10 +82,10 @@ export default function Header({ onOpenSettings }) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={handleLogout}
+          onPress={onOpenSettings}
           style={styles.avatarRing}
           activeOpacity={0.85}
-          accessibilityLabel="User Profile & Logout"
+          accessibilityLabel="Account & Security Settings"
         >
           <View style={styles.avatarInner}>
             <Text style={styles.avatarText}>

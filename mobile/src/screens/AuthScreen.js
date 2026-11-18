@@ -231,25 +231,22 @@ export default function AuthScreen() {
               )}
             </TouchableOpacity>
 
-            {/* Demo Fill Pill */}
+            {/* Multi-User Security Note */}
+            <View style={[styles.demoFillBtn, { backgroundColor: colors.primaryLight, borderColor: colors.border }]}>
+              <Ionicons name="shield-checkmark" size={14} color={colors.primary} />
+              <Text style={[styles.demoFillText, { color: colors.primary }]}>
+                Private per-email vault • Set PIN & Face ID after login
+              </Text>
+            </View>
+
+            {/* Optional Demo Quick Fill */}
             <TouchableOpacity
               style={[styles.demoFillBtn, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}
               onPress={handleFillDemo}
             >
-              <Ionicons name="flash-outline" size={14} color={colors.primary} />
-              <Text style={[styles.demoFillText, { color: colors.primary }]}>
-                Fill Demo Credentials (demo@budgettracker.com)
-              </Text>
-            </TouchableOpacity>
-
-            {/* Offline Demo Button */}
-            <TouchableOpacity
-              style={styles.offlineDemoBtn}
-              onPress={toggleDemoMode}
-            >
-              <Ionicons name="leaf-outline" size={14} color="#059669" />
-              <Text style={styles.offlineDemoText}>
-                {demoMode ? 'Switch to Live Database' : '⚡ Instant Offline Demo Mode'}
+              <Ionicons name="flash-outline" size={14} color={colors.textSecondary} />
+              <Text style={[styles.demoFillText, { color: colors.textSecondary }]}>
+                Try Demo Account (demo@budgettracker.com)
               </Text>
             </TouchableOpacity>
           </View>
@@ -258,7 +255,7 @@ export default function AuthScreen() {
         {/* Footer */}
         <View style={styles.footerNote}>
           <Text style={styles.footerText}>
-            Secure JWT Authentication • Neon PostgreSQL
+            Multi-User Cloud Sync • Neon PostgreSQL
           </Text>
         </View>
       </ScrollView>

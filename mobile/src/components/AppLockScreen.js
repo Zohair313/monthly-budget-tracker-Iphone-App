@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   Animated,
   Platform,
-  StatusBar
+  StatusBar,
+  ActivityIndicator
 } from 'react-native';
 import Ionicons from './Icon';
 import { securityService } from '../services/security';
@@ -15,13 +16,17 @@ const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
 export default function AppLockScreen({
   mode = 'unlock', // 'unlock' | 'setup'
+  userKey,
+  userEmail,
   biometricEnabled = false,
+  biometricSupported = false,
   onUnlock,
-  onCancel
+  onCancel,
+  onUseEmailLogin
 }) {
   const [pin, setPin] = useState('');
   const [firstPin, setFirstPin] = useState('');
-  const [step, setStep] = useState('enter'); // 'enter' | 'confirm' (for setup)
+  const [step, setStep] = useState('enter'); // 'enter' | 'confirm' | 'faceid_offer'
   const [errorMsg, setErrorMsg] = useState('');
   const [bioBusy, setBioBusy] = useState(false);
 
@@ -40,11 +45,11 @@ export default function AppLockScreen({
   };
 
   const handleBiometric = async () => {
-    if (bioBusy || mode !== 'unlock' || !biometricEnabled) return;
+    if (bioBusy || mode !== 'unlock' || !biometricEnabled || !userKey) return;
     setBioBusy(true);
     setErrorMsg('');
     try {
-      const res = await securityService.authenticateBiometric();
+      const res = await securityService.authenticateBiometric(userKey);
       if (res.ok) {
         if (onUnlock) onUnlock();
       } else if (res.error) {
@@ -57,13 +62,26 @@ export default function AppLockScreen({
 
   // Auto-prompt Face ID when opening locked vault
   useEffect(() => {
-    if (mode === 'unlock' && biometricEnabled) {
+    if (mode === 'unlock' && biometricEnabled && userKey) {
       const t = setTimeout(() => {
         handleBiometric();
       }, 350);
       return () => clearTimeout(t);
     }
-  }, [mode, biometricEnabled]);
+  }, [mode, biometricEnabled, userKey]);
+
+  const handleEnableFaceIdAfterPin = async () => {
+    setBioBusy(true);
+    setErrorMsg('');
+    try {
+      await securityService.registerBiometric(userKey, userEmail || userKey);
+      if (onUnlock) onUnlock();
+    } catch (err) {
+      setErrorMsg(err?.message || 'Face ID cancelled. You can enable it anytime in Settings.');
+    } finally {
+      setBioBusy(false);
+    }
+  };
 
   const handleDigit = async (digit) => {
     if (pin.length >= 4) return;
@@ -73,11 +91,11 @@ export default function AppLockScreen({
 
     if (next.length === 4) {
       if (mode === 'unlock') {
-        const valid = await securityService.verifyPin(next);
+        const valid = await securityService.verifyPin(userKey, next);
         if (valid) {
           if (onUnlock) onUnlock();
         } else {
-          triggerShake('Incorrect PIN. Please try again.');
+          triggerShake('Incorrect PIN. Try again or use Email Login.');
         }
       } else if (mode === 'setup') {
         if (step === 'enter') {
@@ -86,8 +104,13 @@ export default function AppLockScreen({
           setStep('confirm');
         } else {
           if (next === firstPin) {
-            await securityService.setPin(next);
-            if (onUnlock) onUnlock();
+            await securityService.setPin(userKey, next);
+            if (biometricSupported) {
+              setStep('faceid_offer');
+              setPin('');
+            } else if (onUnlock) {
+              onUnlock();
+            }
           } else {
             setFirstPin('');
             setStep('enter');
@@ -105,6 +128,62 @@ export default function AppLockScreen({
     }
   };
 
+  // Step 3 (Setup Mode): Optional 1-Tap Face ID activation right after setting PIN
+  if (mode === 'setup' && step === 'faceid_offer') {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#7A63F1" />
+        <View style={styles.orbTop} />
+        <View style={styles.orbBottom} />
+
+        <View style={styles.faceOfferCard}>
+          <View style={[styles.lockCoin, { backgroundColor: '#45CF87', borderBottomColor: '#24A462' }]}>
+            <Ionicons name="scan-outline" size={38} color="#FFFFFF" />
+          </View>
+
+          <Text style={styles.title}>4-Digit PIN Saved!</Text>
+          <Text style={styles.subtitle}>
+            Enable Face ID / Touch ID on this iPhone for instant unlock? You can change this anytime in Settings.
+          </Text>
+
+          {errorMsg.length > 0 && (
+            <View style={[styles.errorPill, { marginTop: 14 }]}>
+              <Ionicons name="alert-circle" size={14} color="#FFE4E6" />
+              <Text style={styles.errorText}>{errorMsg}</Text>
+            </View>
+          )}
+
+          <View style={styles.offerButtons}>
+            <TouchableOpacity
+              style={styles.offerPrimaryBtn}
+              onPress={handleEnableFaceIdAfterPin}
+              disabled={bioBusy}
+              activeOpacity={0.85}
+            >
+              {bioBusy ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <>
+                  <Ionicons name="scan-outline" size={20} color="#FFFFFF" />
+                  <Text style={styles.offerPrimaryText}>Enable Face ID / Touch ID</Text>
+                </>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.offerSecondaryBtn}
+              onPress={onUnlock}
+              disabled={bioBusy}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.offerSecondaryText}>Done (Use PIN Only)</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   const titleText =
     mode === 'setup'
       ? step === 'enter'
@@ -115,7 +194,7 @@ export default function AppLockScreen({
   const subtitleText =
     mode === 'setup'
       ? step === 'enter'
-        ? 'Choose a 4-digit passcode to protect your app'
+        ? 'Choose a 4-digit passcode for your account'
         : 'Re-enter the same 4-digit PIN to confirm'
       : biometricEnabled
         ? 'Unlock with Face ID or enter your 4-digit PIN'
@@ -147,11 +226,16 @@ export default function AppLockScreen({
         <View style={styles.lockCoin}>
           <Ionicons
             name={mode === 'setup' ? 'shield-checkmark' : 'lock-closed'}
-            size={36}
+            size={34}
             color="#FFFFFF"
           />
         </View>
         <Text style={styles.title}>{titleText}</Text>
+        {userEmail ? (
+          <View style={styles.userEmailBadge}>
+            <Text style={styles.userEmailText}>{userEmail}</Text>
+          </View>
+        ) : null}
         <Text style={styles.subtitle}>{subtitleText}</Text>
       </View>
 
@@ -215,7 +299,7 @@ export default function AppLockScreen({
               disabled={bioBusy}
               accessibilityLabel="Unlock with Face ID"
             >
-              <Ionicons name="scan-outline" size={26} color="#FFFFFF" />
+              <Ionicons name="scan-outline" size={24} color="#FFFFFF" />
               <Text style={styles.bioKeyLabel}>Face ID</Text>
             </TouchableOpacity>
           ) : (
@@ -241,6 +325,18 @@ export default function AppLockScreen({
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Fallback: Use Email Login / Switch Account */}
+      {mode === 'unlock' && onUseEmailLogin && (
+        <TouchableOpacity
+          style={styles.emailFallbackBtn}
+          onPress={onUseEmailLogin}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="mail-outline" size={15} color="#FFFFFF" />
+          <Text style={styles.emailFallbackText}>Use Email Login / Switch Account</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -295,12 +391,12 @@ const styles = StyleSheet.create({
   },
   headerBlock: {
     alignItems: 'center',
-    marginBottom: 24
+    marginBottom: 18
   },
   lockCoin: {
-    width: 78,
-    height: 78,
-    borderRadius: 26,
+    width: 72,
+    height: 72,
+    borderRadius: 24,
     backgroundColor: '#6B52E8',
     borderTopWidth: 2.5,
     borderLeftWidth: 2,
@@ -312,7 +408,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#4A32C2',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
     shadowColor: '#3B22B0',
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.4,
@@ -323,13 +419,26 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 22,
     fontWeight: '900',
-    letterSpacing: -0.4
+    letterSpacing: -0.4,
+    textAlign: 'center'
+  },
+  userEmailBadge: {
+    marginTop: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.18)'
+  },
+  userEmailText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700'
   },
   subtitle: {
-    color: 'rgba(255, 255, 255, 0.82)',
+    color: 'rgba(255, 255, 255, 0.84)',
     fontSize: 12,
     fontWeight: '600',
-    marginTop: 5,
+    marginTop: 6,
     textAlign: 'center'
   },
   dotsRow: {
@@ -337,12 +446,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 18,
-    marginBottom: 14
+    marginBottom: 10
   },
   pinDot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: 17,
+    height: 17,
+    borderRadius: 8.5,
     borderWidth: 2.5,
     borderColor: 'rgba(255, 255, 255, 0.55)',
     backgroundColor: 'rgba(255, 255, 255, 0.1)'
@@ -360,10 +469,10 @@ const styles = StyleSheet.create({
     borderColor: '#FCA5A5'
   },
   feedbackSlot: {
-    minHeight: 34,
+    minHeight: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12
+    marginBottom: 10
   },
   errorPill: {
     flexDirection: 'row',
@@ -383,18 +492,18 @@ const styles = StyleSheet.create({
   },
   keypadWrap: {
     width: '100%',
-    maxWidth: 296,
-    gap: 14
+    maxWidth: 288,
+    gap: 12
   },
   keypadRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 16
+    gap: 14
   },
   keyBtn: {
     flex: 1,
-    height: 66,
-    borderRadius: 22,
+    height: 62,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderTopWidth: 2,
     borderLeftWidth: 1.5,
@@ -414,7 +523,7 @@ const styles = StyleSheet.create({
   },
   keyPlaceholder: {
     flex: 1,
-    height: 66
+    height: 62
   },
   bioKeyBtn: {
     backgroundColor: 'rgba(90, 212, 148, 0.32)',
@@ -432,7 +541,71 @@ const styles = StyleSheet.create({
   },
   keyText: {
     color: '#FFFFFF',
-    fontSize: 25,
+    fontSize: 24,
     fontWeight: '800'
+  },
+  emailFallbackBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)'
+  },
+  emailFallbackText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800'
+  },
+  faceOfferCard: {
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+    padding: 24,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.3)'
+  },
+  offerButtons: {
+    width: '100%',
+    gap: 10,
+    marginTop: 22
+  },
+  offerPrimaryBtn: {
+    width: '100%',
+    height: 50,
+    borderRadius: 16,
+    backgroundColor: '#45CF87',
+    borderTopWidth: 2,
+    borderBottomWidth: 4.5,
+    borderTopColor: '#9AF5C4',
+    borderBottomColor: '#24A462',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8
+  },
+  offerPrimaryText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800'
+  },
+  offerSecondaryBtn: {
+    width: '100%',
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  offerSecondaryText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700'
   }
 });

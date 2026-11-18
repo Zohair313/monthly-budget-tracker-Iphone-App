@@ -1,15 +1,22 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-const KEYS = {
-  PIN_HASH: '@budget_lock_pin_hash_v1',
-  BIOMETRIC_ENABLED: '@budget_lock_biometric_v1',
-  CRED_ID: '@budget_lock_cred_id_v1'
-};
+function normalizeUserKey(userKey) {
+  return String(userKey || 'default').trim().toLowerCase();
+}
+
+function keysFor(userKey) {
+  const k = normalizeUserKey(userKey);
+  return {
+    PIN_HASH: `@budget_lock_pin_v2::${k}`,
+    BIOMETRIC_ENABLED: `@budget_lock_bio_v2::${k}`,
+    CRED_ID: `@budget_lock_cred_v2::${k}`
+  };
+}
 
 // Lightweight deterministic hash (works offline across Web & React Native)
-function hashPin(pin) {
-  const salted = `budget_vault_2026::${String(pin)}::clay`;
+function hashPin(pin, userKey) {
+  const salted = `budget_vault_2026::${normalizeUserKey(userKey)}::${String(pin)}::clay`;
   let h1 = 0xdeadbeef ^ salted.length;
   let h2 = 0x41c6ce57 ^ salted.length;
   for (let i = 0; i < salted.length; i++) {
@@ -41,11 +48,15 @@ function base64ToUint8Array(base64) {
 }
 
 export const securityService = {
-  async getLockState() {
+  async getLockState(userKey) {
+    if (!userKey) {
+      return { hasPin: false, biometricEnabled: false };
+    }
+    const keys = keysFor(userKey);
     const [pinHash, bioEnabled, credId] = await Promise.all([
-      AsyncStorage.getItem(KEYS.PIN_HASH),
-      AsyncStorage.getItem(KEYS.BIOMETRIC_ENABLED),
-      AsyncStorage.getItem(KEYS.CRED_ID)
+      AsyncStorage.getItem(keys.PIN_HASH),
+      AsyncStorage.getItem(keys.BIOMETRIC_ENABLED),
+      AsyncStorage.getItem(keys.CRED_ID)
     ]);
     return {
       hasPin: Boolean(pinHash),
@@ -53,25 +64,33 @@ export const securityService = {
     };
   },
 
-  async setPin(pin) {
+  async setPin(userKey, pin) {
+    if (!userKey) throw new Error('No active user account.');
     if (!/^\d{4}$/.test(String(pin))) {
       throw new Error('PIN must be exactly 4 digits.');
     }
-    await AsyncStorage.setItem(KEYS.PIN_HASH, hashPin(pin));
+    const keys = keysFor(userKey);
+    await AsyncStorage.setItem(keys.PIN_HASH, hashPin(pin, userKey));
   },
 
-  async verifyPin(pin) {
-    const stored = await AsyncStorage.getItem(KEYS.PIN_HASH);
+  async verifyPin(userKey, pin) {
+    if (!userKey) return false;
+    const keys = keysFor(userKey);
+    const stored = await AsyncStorage.getItem(keys.PIN_HASH);
     if (!stored) return true;
-    return stored === hashPin(pin);
+    return stored === hashPin(pin, userKey);
   },
 
-  async disableLock() {
-    await AsyncStorage.multiRemove([KEYS.PIN_HASH, KEYS.BIOMETRIC_ENABLED, KEYS.CRED_ID]);
+  async disableLock(userKey) {
+    if (!userKey) return;
+    const keys = keysFor(userKey);
+    await AsyncStorage.multiRemove([keys.PIN_HASH, keys.BIOMETRIC_ENABLED, keys.CRED_ID]);
   },
 
-  async disableBiometric() {
-    await AsyncStorage.multiRemove([KEYS.BIOMETRIC_ENABLED, KEYS.CRED_ID]);
+  async disableBiometric(userKey) {
+    if (!userKey) return;
+    const keys = keysFor(userKey);
+    await AsyncStorage.multiRemove([keys.BIOMETRIC_ENABLED, keys.CRED_ID]);
   },
 
   async isBiometricSupported() {
@@ -86,7 +105,8 @@ export const securityService = {
     }
   },
 
-  async registerBiometric(userLabel = 'Budget Tracker User') {
+  async registerBiometric(userKey, userLabel = 'Budget Tracker User') {
+    if (!userKey) throw new Error('No active user account.');
     const supported = await this.isBiometricSupported();
     if (!supported) {
       throw new Error('Face ID / Touch ID requires HTTPS on a supported iPhone, Android, or Mac.');
@@ -127,20 +147,23 @@ export const securityService = {
       throw new Error('Face ID setup was cancelled.');
     }
 
-    await AsyncStorage.setItem(KEYS.CRED_ID, bufferToBase64(credential.rawId));
-    await AsyncStorage.setItem(KEYS.BIOMETRIC_ENABLED, 'true');
+    const keys = keysFor(userKey);
+    await AsyncStorage.setItem(keys.CRED_ID, bufferToBase64(credential.rawId));
+    await AsyncStorage.setItem(keys.BIOMETRIC_ENABLED, 'true');
     return true;
   },
 
-  async authenticateBiometric() {
+  async authenticateBiometric(userKey) {
+    if (!userKey) return { ok: false, error: 'No active user account.' };
     const supported = await this.isBiometricSupported();
     if (!supported) {
       return { ok: false, error: 'Face ID / Touch ID is unavailable on this browser.' };
     }
 
-    const credIdBase64 = await AsyncStorage.getItem(KEYS.CRED_ID);
+    const keys = keysFor(userKey);
+    const credIdBase64 = await AsyncStorage.getItem(keys.CRED_ID);
     if (!credIdBase64) {
-      return { ok: false, error: 'Face ID is not registered yet.' };
+      return { ok: false, error: 'Face ID is not registered for this account.' };
     }
 
     try {

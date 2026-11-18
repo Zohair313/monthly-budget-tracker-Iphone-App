@@ -1,4 +1,4 @@
-const CACHE_NAME = 'budget-tracker-pwa-v3';
+const CACHE_NAME = 'budget-tracker-pwa-v4';
 const APP_SHELL = ['/', '/manifest.json', '/icon.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {

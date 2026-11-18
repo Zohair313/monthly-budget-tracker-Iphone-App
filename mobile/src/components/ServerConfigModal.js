@@ -16,7 +16,7 @@ import { useSecurity } from '../context/SecurityContext';
 import { palette, getClayCard, getClayButton, getClayInput, getClayPill } from '../theme/colors';
 
 export default function ServerConfigModal({ visible, onClose }) {
-  const { user, apiUrl, updateApiUrl, demoMode, toggleDemoMode, themeMode } = useAuth();
+  const { user, isAuthenticated, logout, apiUrl, updateApiUrl, demoMode, toggleDemoMode, themeMode } = useAuth();
   const {
     hasPin,
     biometricEnabled,
@@ -91,6 +91,11 @@ export default function ServerConfigModal({ visible, onClose }) {
     setTimeout(() => lockNow(), 120);
   };
 
+  const handleSwitchAccount = async () => {
+    onClose();
+    await logout();
+  };
+
   const handleSave = async () => {
     if (!inputUrl.trim()) {
       Alert.alert('Invalid URL', 'Please provide a valid backend URL.');
@@ -153,84 +158,127 @@ export default function ServerConfigModal({ visible, onClose }) {
           </View>
 
           <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={false}>
+            {/* SECTION 0: ACTIVE ACCOUNT & MULTI-USER SWITCHER */}
+            {isAuthenticated && user && (
+              <>
+                <Text style={[styles.sectionLabel, { color: colors.primary }]}>
+                  SIGNED-IN ACCOUNT
+                </Text>
+                <View style={[styles.accountCard, clayPill, { backgroundColor: colors.surfaceSubtle }]}>
+                  <View style={styles.accountRow}>
+                    <View style={[styles.accountAvatar, { backgroundColor: colors.primary }]}>
+                      <Text style={styles.accountAvatarText}>
+                        {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={styles.settingInfo}>
+                      <Text style={[styles.settingTitle, { color: colors.text }]} numberOfLines={1}>
+                        {user.name || 'Account Holder'}
+                      </Text>
+                      <Text style={[styles.settingDesc, { color: colors.textSecondary }]} numberOfLines={1}>
+                        {user.email}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={handleSwitchAccount}
+                    style={[styles.logoutBtn, { backgroundColor: colors.expenseLight, borderColor: colors.expense }]}
+                    activeOpacity={0.82}
+                  >
+                    <Ionicons name="log-out-outline" size={16} color={colors.expense} />
+                    <Text style={[styles.logoutBtnText, { color: colors.expense }]}>
+                      Log Out / Switch Email Account
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+
             {/* SECTION 1: SECURITY & VAULT LOCK (PIN + FACE ID) */}
-            <Text style={[styles.sectionLabel, { color: colors.primary }]}>
-              SECURITY & APP LOCK
-            </Text>
+            {isAuthenticated && (
+              <>
+                <Text style={[styles.sectionLabel, { color: colors.primary }]}>
+                  SECURITY & APP LOCK
+                </Text>
 
-            <View style={[styles.securityCard, clayPill, { backgroundColor: colors.surfaceSubtle }]}>
-              {/* 4-Digit PIN Lock Row */}
-              <View style={styles.settingRow}>
-                <View style={styles.settingInfo}>
-                  <View style={styles.settingTitleRow}>
-                    <Ionicons name="lock-closed" size={16} color={colors.primary} />
-                    <Text style={[styles.settingTitle, { color: colors.text }]}>
-                      4-Digit PIN Lock
-                    </Text>
+                <View style={[styles.securityCard, clayPill, { backgroundColor: colors.surfaceSubtle }]}>
+                  {/* 4-Digit PIN Lock Row */}
+                  <View style={styles.settingRow}>
+                    <View style={styles.settingInfo}>
+                      <View style={styles.settingTitleRow}>
+                        <Ionicons name="lock-closed" size={16} color={colors.primary} />
+                        <Text style={[styles.settingTitle, { color: colors.text }]}>
+                          4-Digit PIN Lock
+                        </Text>
+                      </View>
+                      <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
+                        {hasPin
+                          ? 'Active • Unlock with PIN/Face ID on reopen'
+                          : 'OFF • Requires Email login on next reopen'}
+                      </Text>
+                    </View>
+                    <Switch
+                      value={hasPin}
+                      onValueChange={handleTogglePin}
+                      trackColor={{ false: colors.border, true: colors.primary }}
+                      thumbColor="#FFFFFF"
+                    />
                   </View>
-                  <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
-                    {hasPin ? 'Active • Protects your budget vault' : 'Require a 4-digit PIN on launch'}
-                  </Text>
-                </View>
-                <Switch
-                  value={hasPin}
-                  onValueChange={handleTogglePin}
-                  trackColor={{ false: colors.border, true: colors.primary }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
 
-              <View style={[styles.rowDivider, { backgroundColor: colors.border }]} />
+                  <View style={[styles.rowDivider, { backgroundColor: colors.border }]} />
 
-              {/* Face ID / Touch ID Row */}
-              <View style={styles.settingRow}>
-                <View style={styles.settingInfo}>
-                  <View style={styles.settingTitleRow}>
-                    <Ionicons name="scan-outline" size={16} color={colors.income} />
-                    <Text style={[styles.settingTitle, { color: colors.text }]}>
-                      Face ID / Touch ID
-                    </Text>
+                  {/* Face ID / Touch ID Row */}
+                  <View style={styles.settingRow}>
+                    <View style={styles.settingInfo}>
+                      <View style={styles.settingTitleRow}>
+                        <Ionicons name="scan-outline" size={16} color={colors.income} />
+                        <Text style={[styles.settingTitle, { color: colors.text }]}>
+                          Face ID / Touch ID
+                        </Text>
+                      </View>
+                      <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
+                        {biometricEnabled
+                          ? 'Enabled for this email account'
+                          : biometricSupported
+                            ? 'Instant biometric unlock on iPhone'
+                            : 'Set PIN first (requires iPhone HTTPS)'}
+                      </Text>
+                    </View>
+                    <Switch
+                      value={biometricEnabled}
+                      onValueChange={handleToggleBiometric}
+                      disabled={bioBusy || !hasPin}
+                      trackColor={{ false: colors.border, true: colors.income }}
+                      thumbColor="#FFFFFF"
+                    />
                   </View>
-                  <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
-                    {biometricEnabled
-                      ? 'Enabled on this device'
-                      : biometricSupported
-                        ? 'Instant biometric unlock on iPhone'
-                        : 'Set PIN first (requires iPhone HTTPS)'}
-                  </Text>
-                </View>
-                <Switch
-                  value={biometricEnabled}
-                  onValueChange={handleToggleBiometric}
-                  disabled={bioBusy || !hasPin}
-                  trackColor={{ false: colors.border, true: colors.income }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
 
-              {/* Quick Actions when PIN is active */}
-              {hasPin && (
-                <View style={styles.pinActionsRow}>
-                  <TouchableOpacity
-                    onPress={handleChangePin}
-                    style={[styles.pinMiniBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="key-outline" size={14} color={colors.primary} />
-                    <Text style={[styles.pinMiniText, { color: colors.primary }]}>Change PIN</Text>
-                  </TouchableOpacity>
+                  {/* Quick Actions when PIN is active */}
+                  {hasPin && (
+                    <View style={styles.pinActionsRow}>
+                      <TouchableOpacity
+                        onPress={handleChangePin}
+                        style={[styles.pinMiniBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                        activeOpacity={0.8}
+                      >
+                        <Ionicons name="key-outline" size={14} color={colors.primary} />
+                        <Text style={[styles.pinMiniText, { color: colors.primary }]}>Change PIN</Text>
+                      </TouchableOpacity>
 
-                  <TouchableOpacity
-                    onPress={handleLockNow}
-                    style={[styles.pinMiniBtn, { backgroundColor: colors.primary, borderColor: colors.primary }]}
-                    activeOpacity={0.85}
-                  >
-                    <Ionicons name="lock-closed" size={14} color="#FFFFFF" />
-                    <Text style={[styles.pinMiniText, { color: '#FFFFFF' }]}>Lock Now</Text>
-                  </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={handleLockNow}
+                        style={[styles.pinMiniBtn, { backgroundColor: colors.primary, borderColor: colors.primary }]}
+                        activeOpacity={0.85}
+                      >
+                        <Ionicons name="lock-closed" size={14} color="#FFFFFF" />
+                        <Text style={[styles.pinMiniText, { color: '#FFFFFF' }]}>Lock Now</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
-              )}
-            </View>
+              </>
+            )}
 
             {securityMsg.length > 0 && (
               <View
@@ -403,6 +451,43 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 0.8,
     marginBottom: 8
+  },
+  accountCard: {
+    padding: 14,
+    borderRadius: 18,
+    marginBottom: 14,
+    gap: 12
+  },
+  accountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12
+  },
+  accountAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  accountAvatarText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '900'
+  },
+  logoutBtn: {
+    width: '100%',
+    height: 40,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6
+  },
+  logoutBtnText: {
+    fontSize: 12,
+    fontWeight: '800'
   },
   securityCard: {
     padding: 14,

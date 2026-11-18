@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api, STORAGE_KEYS } from '../services/api';
+import { securityService } from '../services/security';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [sessionSource, setSessionSource] = useState(null); // 'restored' | 'fresh_login' | null
   const [isLoading, setIsLoading] = useState(true);
   const [themeMode, setThemeMode] = useState('light');
   const [demoMode, setDemoModeState] = useState(false);
@@ -17,8 +19,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loadInitialState = async () => {
-    // 1-second timeout safeguard so it never hangs in loading state
-    const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 1000));
+    const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 1500));
     try {
       await Promise.race([
         (async () => {
@@ -29,8 +30,23 @@ export const AuthProvider = ({ children }) => {
           const storedDemo = await AsyncStorage.getItem(STORAGE_KEYS.DEMO_MODE);
 
           if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(JSON.parse(storedUser));
+            const parsedUser = JSON.parse(storedUser);
+            const userKey = parsedUser?.email || parsedUser?.id;
+            const lockState = await securityService.getLockState(userKey);
+
+            if (lockState.hasPin) {
+              // User has PIN / Face ID enabled: restore session and unlock via PIN/Face ID
+              setToken(storedToken);
+              setUser(parsedUser);
+              setSessionSource('restored');
+            } else {
+              // No PIN / Face ID configured: require fresh Email login on reopen
+              await api.setToken(null);
+              await AsyncStorage.removeItem(STORAGE_KEYS.USER);
+              setToken(null);
+              setUser(null);
+              setSessionSource(null);
+            }
           }
 
           if (storedTheme) {
@@ -61,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     if (res.success && res.token) {
       setToken(res.token);
       setUser(res.user);
+      setSessionSource('fresh_login');
       await api.setToken(res.token);
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(res.user));
     }
@@ -76,16 +93,17 @@ export const AuthProvider = ({ children }) => {
     if (res.success && res.token) {
       setToken(res.token);
       setUser(res.user);
+      setSessionSource('fresh_login');
       await api.setToken(res.token);
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(res.user));
     }
     return res;
   };
 
-  // F10: Logout - Clears the token and returns to the login screen
   const logout = async () => {
     setToken(null);
     setUser(null);
+    setSessionSource(null);
     await api.setToken(null);
     await AsyncStorage.removeItem(STORAGE_KEYS.USER);
   };
@@ -102,8 +120,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const toggleDemoMode = async (enable) => {
-    await api.setDemoMode(enable);
-    setDemoModeState(enable);
+    const next = typeof enable === 'boolean' ? enable : !demoMode;
+    await api.setDemoMode(next);
+    setDemoModeState(next);
   };
 
   return (
@@ -111,6 +130,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         token,
+        sessionSource,
         isAuthenticated: !!token,
         isLoading,
         themeMode,

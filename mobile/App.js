@@ -8,6 +8,7 @@ import AuthScreen from './src/screens/AuthScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import AnimatedSplashScreen from './src/components/AnimatedSplashScreen';
 import AppLockScreen from './src/components/AppLockScreen';
+import SecurityGuideModal from './src/components/SecurityGuideModal';
 import { palette } from './src/theme/colors';
 
 // Fallback Error Boundary to display runtime errors gracefully
@@ -44,14 +45,20 @@ class ErrorBoundary extends Component {
 }
 
 function RootNavigator() {
-  const { isAuthenticated, isLoading, themeMode } = useAuth();
+  const { user, isAuthenticated, isLoading, themeMode } = useAuth();
   const {
+    userKey,
     isLocked,
     isSettingUpPin,
+    showSecurityGuide,
     biometricEnabled,
+    biometricSupported,
+    startPinSetup,
+    dismissSecurityGuide,
     unlock,
     finishPinSetup,
-    cancelPinSetup
+    cancelPinSetup,
+    switchToEmailLogin
   } = useSecurity();
   const colors = palette[themeMode] || palette.light;
 
@@ -76,19 +83,32 @@ function RootNavigator() {
         <AuthScreen />
       )}
 
+      {/* Post-Login Instruction Modal: Guide user to set PIN/Face ID or use Settings */}
+      <SecurityGuideModal
+        visible={isAuthenticated && showSecurityGuide && !isLocked && !isSettingUpPin}
+        onSetupNow={startPinSetup}
+        onSkip={dismissSecurityGuide}
+      />
+
       {/* Full-Screen 3D Claymorphism PIN / Face ID Lock Overlay */}
       {isLocked && (
         <AppLockScreen
           mode="unlock"
+          userKey={userKey}
+          userEmail={user?.email}
           biometricEnabled={biometricEnabled}
           onUnlock={unlock}
+          onUseEmailLogin={switchToEmailLogin}
         />
       )}
 
-      {/* Full-Screen 4-Digit PIN Setup Flow */}
+      {/* Full-Screen 4-Digit PIN + Optional Face ID Setup Flow */}
       {isSettingUpPin && (
         <AppLockScreen
           mode="setup"
+          userKey={userKey}
+          userEmail={user?.email}
+          biometricSupported={biometricSupported}
           onUnlock={finishPinSetup}
           onCancel={cancelPinSetup}
         />
